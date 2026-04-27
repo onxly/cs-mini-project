@@ -11,6 +11,6 @@ public interface IPositionalList<E> {
 	IPosition<E> addLast(E elm);
 	IPosition<E> addBefore(IPosition<E> pos, E elm);
 	IPosition<E> addAfter(IPosition<E> pos, E elm);
-	IPosition<E> set(IPosition<E> pos, E elm);
-	IPosition<E> remove(E elm);
+	E set(IPosition<E> pos, E elm);
+	E remove(IPosition<E> pos);
 }

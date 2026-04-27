@@ -1,6 +1,9 @@
 package EXEcutioners.GUI.UserInterfaces;
 
 import EXEcutioners.GUI.interfaces.IPreviousHelper;
+import EXEcutioners.imagehandling.GrayBlurSobel;
+
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -66,17 +69,14 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 	
 	public void onLeftDroppedFile(ArrayList<File> Files)
 	{
-		
-		
-	
-		
+		GrayBlurSobel.GetSobelImage(Files.getFirst().getAbsolutePath());
 		PopulateBox(ImageSpotLeft, Files, left);
 	}
 	public void onRightDroppedFile(ArrayList<File> Files)
 	{
 	
 		//ImagesHolder.getChildren().addAll(ImageSpotRight,Right);
-		
+		GrayBlurSobel.GetSobelImage(Files.getFirst().getAbsolutePath());
 		PopulateBox(ImageSpotRight,Files, Right);
 	}
 	public void PopulateBox(TextArea A, ArrayList<File> Files,ScrollPane scroll)

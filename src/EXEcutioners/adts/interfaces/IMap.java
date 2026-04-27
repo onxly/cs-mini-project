@@ -1,6 +1,6 @@
-package EXEcutioners.adts.map;
+package EXEcutioners.adts.interfaces;
 
-public interface MapInterface<K, V> {
+public interface IMap<K, V> {
 	int size();
 	boolean containsKey(K key);
 	boolean isEmpty();
@@ -9,5 +9,5 @@ public interface MapInterface<K, V> {
 	V remove(K key);
 	Iterable<K> keySet();
 	Iterable<V> values();
-	Iterable<EntryInterface<K,V>>entrySet();
+	Iterable<IEntry<K,V>>entrySet();
 }

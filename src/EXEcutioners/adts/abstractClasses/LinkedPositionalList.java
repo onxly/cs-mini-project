@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IPositionalList;
 
-public class LinkedPositionalList<E> implements IPositionalList<E> {
+public class LinkedPositionalList<E> implements IPositionalList<E>, Iterable<E> {
 	private class PositionsIterator implements Iterator<IPosition<E>>{
 		private IPosition<E> cursor = LinkedPositionalList.this.first();
 		private IPosition<E> current = null;

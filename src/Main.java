@@ -4,11 +4,14 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import EXEcutioners.imagehandling.*;
 
 public class Main extends Application  {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		ImageProcessor.processImg("guts-artwork-5120x2880-21418.jpg");
+		
 		launch(args);
 	}
 

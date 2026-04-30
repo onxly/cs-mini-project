@@ -62,13 +62,13 @@ public class GraphFileHelper {
         File folder = new File(directory);
 
         if (!folder.exists() || !folder.isDirectory()) {
-            return graphs;
+            return null;
         }
 
         File[] files = folder.listFiles();
 
         if (files == null) {
-            return graphs;
+            return null;
         }
 
         for (File file : files) {

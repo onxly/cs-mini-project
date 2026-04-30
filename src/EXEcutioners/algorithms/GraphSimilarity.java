@@ -41,43 +41,18 @@ public class GraphSimilarity {
 	
 	public void setGraphA(Graph graph) {
 		this.graphA = graph;
+		this.score = null;
 	}
 	
 	public void setGraphB(Graph graph) {
 		this.graphB = graph;
+		this.score = null;
 	}
 	
 	public void calculateScore() {
 		
-		Double totalDistance = 0.0;
+		this.score = GraphSimilarity.calculateScore(this.graphA, this.graphB);
 		
-		Iterator<RegionNode> regionsA =  graphA.getRegions().iterator();
-		
-		Iterator<RegionNode> regionsB =  graphB.getRegions().iterator();
-		
-		while(regionsA.hasNext()) {
-			
-			RegionNode i = regionsA.next();
-			
-			Double minDistance = null;
-			
-			while(regionsB.hasNext()) {
-				
-				RegionNode j = regionsB.next();
-				
-				Double distance = calculateDistance(i,j);
-				
-				if(minDistance == null || distance < minDistance) {
-					minDistance = distance;
-				}
-				
-			}
-			
-			totalDistance += minDistance;
-			
-		}
-		
-		this.score = 1/1+(totalDistance/16);
 	}
 	
 	public static Double calculateScore(Graph a, Graph b) {
@@ -86,13 +61,13 @@ public class GraphSimilarity {
 		
 		Iterator<RegionNode> regionsA =  a.getRegions().iterator();
 		
-		Iterator<RegionNode> regionsB =  b.getRegions().iterator();
-		
 		while(regionsA.hasNext()) {
 			
 			RegionNode i = regionsA.next();
 			
 			Double minDistance = null;
+			
+			Iterator<RegionNode> regionsB =  b.getRegions().iterator();
 			
 			while(regionsB.hasNext()) {
 				
@@ -110,25 +85,30 @@ public class GraphSimilarity {
 			
 		}
 		
-		return 1/1+(totalDistance/16);
+		return 1.0/(1.0+(totalDistance/a.getRegions().size()));
 	}
 	
-	// This might be the same one @Boyzn uses (reference that instead if that is the case)
+	
 	public static Double calculateDistance(RegionNode a, RegionNode b) {
 		
 		Double[] featuresA = a.getFeatures();
 		Double[] featuresB = b.getFeatures();
 		
 		Double sum = 0.0;
+		Double finalDistance;
+		int numFeatures = featuresA.length;
 		
-		for(int i=0; i<featuresA.length; i++) {
+		if(featuresB.length != numFeatures) return null;
+		
+		for(int i=0; i < numFeatures; i++) {
 			
 			sum += Math.pow(featuresA[i] - featuresB[i], 2);
 			
 		}
 		
+		finalDistance = (0.1 * Math.abs(a.getAvgWeight() - b.getAvgWeight())) + (0.2 * Math.abs(a.getDegree() - b.getDegree())) + (0.7 * Math.sqrt(sum));
 		
-		return Math.sqrt(sum);
+		return finalDistance;
 	}
 	
 }

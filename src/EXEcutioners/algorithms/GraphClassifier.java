@@ -24,33 +24,28 @@ public class GraphClassifier {
 	
 	public void setGraph(Graph graph) {
 		this.inputGraph = graph;
+		this.closestAnimal = null;
 	}
 	
 	public String classify() {
 		
-		ArrayList<Graph> graphs = GraphFileHelper.readGraphsFromDirectory("data/graphs");
+		String response = GraphClassifier.classify(inputGraph);
 		
-		Double maxScore = null;
-		
-		for(Graph graph : graphs) {
-			
-			Double score = GraphSimilarity.calculateScore(inputGraph, graph);
-			
-			if(maxScore == null || score > maxScore) {
-				
-				maxScore = score;
-				this.closestAnimal = graph.getName();
-				
-			}
-			
-		}
-		
-		return this.closestAnimal + ": " + (maxScore * 100) + "%";
+		this.closestAnimal = response.split(":")[0];
+
+		return response;
 	}
 	
 	public static String classify(Graph inGraph) {
 		
 		ArrayList<Graph> graphs = GraphFileHelper.readGraphsFromDirectory("data/graphs");
+		
+		if(graphs == null) {
+			
+			System.err.println("Something is wrong with the graphs folder!");
+			return "GraphClassifier Error!";
+			
+		}
 		
 		String animalName = "";
 		

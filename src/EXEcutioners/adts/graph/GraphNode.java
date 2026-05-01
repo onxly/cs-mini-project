@@ -7,32 +7,20 @@ import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 
 public class GraphNode extends Vertex<String ,Double> {
-	String regionPosition;
-	
-    Double[] featureVector;
+	int[] regionPosition;
+    double[] featureVector;
     
-    public GraphNode(String regionPosition, Double[] featureVector) {
+    public GraphNode(int[] regionPosition, double[] featureVector) {
     	super("Something", false);
         this.regionPosition = regionPosition;
         this.featureVector = featureVector;
     }
 	
 	public int[] getRegionPos() {
-		return new int[2];
+		return this.regionPosition;
 	}
 	public double[] getRegionVector() {
-		return new double[2];
-	}
-
-	@Override
-	public String getElement() {
-		return super.getElement();
-	}
-
-	@Override
-	public IPosition<IVertex<String>> getPosition() {
-		PQEntry<String, Double[]> entry = new PQEntry<String, Double[]>(regionPosition, featureVector);
-		return (IPosition<IVertex<String>>) entry;
+		return this.featureVector;
 	}
 
 }

@@ -9,11 +9,8 @@ import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.abstractClasses.Vertex;
 import EXEcutioners.adts.interfaces.IVertex;
 
-public class ImageGraph extends MapGraph<GraphNode, Double> {
-	private MapGraph<GraphNode, Double> imgGraph;
-	private LinkedPositionalList<GraphNode> nodes;
+public class ImageGraph extends MapGraph<String, Double> {
 	private int k = 0;
-	
 	private String animalName;
 	
 	public ImageGraph(int kValue) {
@@ -53,15 +50,13 @@ public class ImageGraph extends MapGraph<GraphNode, Double> {
 				IEntry<Double ,GraphNode> entry =  list.removeMin();
 				double dis = entry.getKey();
 				GraphNode node2 = entry.getValue();
-				super.insertEdge((IVertex)node, (IVertex) node2, dis);
+				super.insertEdge(node, node2, dis);
 			}
 		}
 	}
 	
-	public void setAnimalName(String animal) {
-		
-		this.animalName = animal;
-		
+	public void setAnimalName(String animal) {	
+		this.animalName = animal;	
 	}
 	
 	public String getAnimalName() {

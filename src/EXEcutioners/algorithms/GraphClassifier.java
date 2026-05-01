@@ -2,15 +2,15 @@ package EXEcutioners.algorithms;
 
 import java.util.ArrayList;
 
-import EXEcutioners.dummy.Graph;
+import EXEcutioners.adts.graph.ImageGraph;
 import EXEcutioners.utils.GraphFileHelper;
 
 public class GraphClassifier {
 	
-	private Graph inputGraph;
+	private ImageGraph inputGraph;
 	private String closestAnimal;
 	
-	public GraphClassifier(Graph graph) {
+	public GraphClassifier(ImageGraph graph) {
 		this.inputGraph = graph;
 	}
 	
@@ -18,11 +18,11 @@ public class GraphClassifier {
 		return this.closestAnimal;
 	}
 	
-	public Graph getGraph() {
+	public ImageGraph getGraph() {
 		return inputGraph;
 	}
 	
-	public void setGraph(Graph graph) {
+	public void setGraph(ImageGraph graph) {
 		this.inputGraph = graph;
 		this.closestAnimal = null;
 	}
@@ -36,9 +36,9 @@ public class GraphClassifier {
 		return response;
 	}
 	
-	public static String classify(Graph inGraph) {
+	public static String classify(ImageGraph inGraph) {
 		
-		ArrayList<Graph> graphs = GraphFileHelper.readGraphsFromDirectory("data/graphs");
+		ArrayList<ImageGraph> graphs = GraphFileHelper.readGraphsFromDirectory("data/graphs");
 		
 		if(graphs == null) {
 			
@@ -51,14 +51,14 @@ public class GraphClassifier {
 		
 		Double maxScore = null;
 		
-		for(Graph graph : graphs) {
+		for(ImageGraph graph : graphs) {
 			
 			Double score = GraphSimilarity.calculateScore(inGraph, graph);
 			
 			if(maxScore == null || score > maxScore) {
 				
 				maxScore = score;
-				animalName = graph.getName();
+				animalName = graph.getAnimalName();
 				
 			}
 			

@@ -6,13 +6,13 @@ import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 
-public class GraphNode implements IVertex<IEntry<String, Double[]>> {
+public class GraphNode extends Vertex<String ,Double> {
 	String regionPosition;
 	
     Double[] featureVector;
     
     public GraphNode(String regionPosition, Double[] featureVector) {
-
+    	super("Something", false);
         this.regionPosition = regionPosition;
         this.featureVector = featureVector;
     }
@@ -25,15 +25,14 @@ public class GraphNode implements IVertex<IEntry<String, Double[]>> {
 	}
 
 	@Override
-	public IEntry<String, Double[]> getElement() {
-		PQEntry<String, Double[]> entry = new PQEntry<String, Double[]>(regionPosition, featureVector);
-		return entry;
+	public String getElement() {
+		return super.getElement();
 	}
 
 	@Override
-	public IPosition<IVertex<IEntry<String, Double[]>>> getPosition() {
+	public IPosition<IVertex<String>> getPosition() {
 		PQEntry<String, Double[]> entry = new PQEntry<String, Double[]>(regionPosition, featureVector);
-		return (IPosition<IVertex<IEntry<String, Double[]>>>) entry;
+		return (IPosition<IVertex<String>>) entry;
 	}
 
 }

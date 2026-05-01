@@ -2,6 +2,8 @@ package EXEcutioners.GUI.UserInterfaces;
 
 import EXEcutioners.GUI.interfaces.IPreviousHelper;
 import EXEcutioners.adts.abstractClasses.LinkedPositionalList;
+import EXEcutioners.adts.graph.GraphNode;
+import EXEcutioners.adts.graph.ImageGraph;
 import EXEcutioners.imagehandling.GrayBlurSobel;
 import EXEcutioners.imagehandling.ImageProcessor;
 import EXEcutioners.imagehandling.LinkedRegionalList;
@@ -87,28 +89,18 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		ImageRegionList.AddImageRegions(ImageProcessor.processImg(f.getAbsolutePath()));//regions of said image;
 		System.out.println("got past adding: "+ImageRegionList.getSize());
 		
+		/*for (Iterator<Iterable<GraphNode>> iterator = ImageRegionList.getGraphNodeList().iterator(); iterator.hasNext();) {
+			Iterable<GraphNode> file = (Iterable<GraphNode>) iterator.next();
+			
+		}*/
+		
 			
 		}
-		for (Iterator<LinkedPositionalList<RegionFeature>> iterator = ImageRegionList.getPerImagelists().iterator(); iterator.hasNext();) {
+		for (Iterator<Iterable<GraphNode>> iterator = ImageRegionList.getGraphNodeList().iterator(); iterator.hasNext();) {
+			ImageGraph IG = new ImageGraph(3);
+			Iterable<GraphNode> listofRegions = (Iterable<GraphNode>) iterator.next();
 			
-			
-			//this is what he needs( feme that is)
-			System.out.println("line needed for feme :"+ "Comparisioninterface.java: line 97");
-			LinkedPositionalList<RegionFeature>  listofRegions = (LinkedPositionalList<RegionFeature>) iterator.next();
-			System.out.println("welp");
-			int r=1;
-			for (Iterator i = listofRegions.iterator(); i.hasNext();) {
-				RegionFeature R = (RegionFeature) i.next();
-				System.out.println("region :"+r+" "+R.toString());
-				try {
-					ImageIO.write(R.getSobelImage(), "jpg", new File("Sob"+r+".jpg"));
-					ImageIO.write(R.getOrigionalimage(), "jpg", new File("Org"+r+".jpg"));
-					r++;
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+			IG.buildGraph(listofRegions);
 		}
 
 		

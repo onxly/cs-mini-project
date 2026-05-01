@@ -2,6 +2,9 @@ package EXEcutioners.imagehandling;
 
 import java.awt.image.BufferedImage;
 
+import EXEcutioners.adts.graph.GraphNode;
+import javafx.geometry.Pos;
+
 
 public class RegionFeature {
 	private double AvgAllRed=0;
@@ -65,6 +68,20 @@ public class RegionFeature {
 		EdgeDensity=(double)NumWhite/(double)pixelCount;
 		vector= new double[] {AvgAllRed,AvgAllGreen,AvgAllBlue,EdgeDensity};
 		
+	}
+	
+	public GraphNode getGraphNode()
+	{
+		Double[] Dvector = new Double[vector.length];
+		
+		int i =0;
+		for (double d : vector) {
+			Dvector[i] = (Double) d;
+			i++;
+		}
+		String Positions=x+""+y;
+		GraphNode GN = new GraphNode(Positions, Dvector);
+		return GN;	
 	}
 	
 	public double[] getVector() {

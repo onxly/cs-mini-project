@@ -1,4 +1,4 @@
-package EXEcutioners.algorithms.ml;
+/*package EXEcutioners.algorithms.ml;
 
 import java.util.ArrayList;
 
@@ -108,4 +108,4 @@ public class GraphClassifierML {
 
         return predictedAnimal + ": " + confidence + "%";
     }
-}
+}*/

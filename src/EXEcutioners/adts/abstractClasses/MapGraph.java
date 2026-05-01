@@ -1,5 +1,6 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import EXEcutioners.adts.interfaces.IEdge;
@@ -9,9 +10,9 @@ import EXEcutioners.adts.interfaces.IPositionalList;
 import EXEcutioners.adts.interfaces.IVertex;
 
 public class MapGraph<V, E> implements IGraph<V, E>{
-	private boolean isDirected;
-	private LinkedPositionalList<IVertex<V>> vertices = new LinkedPositionalList<>();
-	private LinkedPositionalList<IEdge<V,E>> edges = new LinkedPositionalList<>();
+	protected boolean isDirected;
+	protected LinkedPositionalList<IVertex<V>> vertices = new LinkedPositionalList<>();
+	protected LinkedPositionalList<IEdge<V,E>> edges = new LinkedPositionalList<>();
 	
 	
 	public MapGraph(boolean bDirected) {
@@ -76,7 +77,7 @@ public class MapGraph<V, E> implements IGraph<V, E>{
 		Vertex<V, E> newVertex = validateVertex(vertex);
 		return newVertex.getOutgoing().values();
 	}
-
+	
 	@Override
 	public Iterable<IEdge<V, E>> incomingEdges(IVertex<V> vertex) {
 		Vertex<V, E> newVertex = validateVertex(vertex);
@@ -140,9 +141,7 @@ public class MapGraph<V, E> implements IGraph<V, E>{
 
 	@Override
 	public E removeEdge(IEdge<V, E> edge) {
-		
 		return null;
-		
 	}
 
 	@Override

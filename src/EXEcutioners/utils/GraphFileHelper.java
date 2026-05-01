@@ -10,11 +10,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-import EXEcutioners.dummy.Graph;
+import EXEcutioners.adts.graph.ImageGraph;
+
 
 public class GraphFileHelper {
 	
-    public static void saveGraph(Graph graph, String directory, String fileName) {
+    public static void saveGraph(ImageGraph graph, String directory, String fileName) {
         File folder = new File(directory);
 
         if (!folder.exists()) {
@@ -35,15 +36,15 @@ public class GraphFileHelper {
     }
 
 
-    public static Graph readGraph(File file) {
+    public static ImageGraph readGraph(File file) {
         try (FileInputStream fis = new FileInputStream(file);
             BufferedInputStream bis = new BufferedInputStream(fis);
             ObjectInputStream in = new ObjectInputStream(bis)) {
         	
             Object obj = in.readObject();
 
-            if (obj instanceof Graph) {
-                return (Graph) obj;
+            if (obj instanceof ImageGraph) {
+                return (ImageGraph) obj;
             } else {
                 System.err.println("File does not contain a Graph: " + file.getName());
             }
@@ -56,8 +57,8 @@ public class GraphFileHelper {
     }
 
 
-    public static ArrayList<Graph> readGraphsFromDirectory(String directory) {
-    	ArrayList<Graph> graphs = new ArrayList<Graph>();
+    public static ArrayList<ImageGraph> readGraphsFromDirectory(String directory) {
+    	ArrayList<ImageGraph> graphs = new ArrayList<ImageGraph>();
 
         File folder = new File(directory);
 
@@ -73,7 +74,7 @@ public class GraphFileHelper {
 
         for (File file : files) {
             if (file.isFile()) {
-                Graph graph = readGraph(file);
+            	ImageGraph graph = readGraph(file);
 
                 if (graph != null) {
                     graphs.add(graph);

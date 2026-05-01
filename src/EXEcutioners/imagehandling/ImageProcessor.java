@@ -32,7 +32,7 @@ public class ImageProcessor {
 			
 			int secHeight=image.getHeight()/4;
 			int secWidth=image.getWidth()/4;
-			
+						
 			RegionList reglist=new RegionList();
 			
 			for(int c=0;c<(secWidth*4);c+=secWidth)
@@ -45,15 +45,6 @@ public class ImageProcessor {
 					reglist.addRegion(reg);
 				}
 			}
-						
-			
-			/*for testing purposes
-			 * int i=0;
-			for(Region img:reglist)
-			{
-				++i;
-				ImageIO.write(img.image, "png", new File(i+"output.png"));
-			}*/
 
 			System.out.println("Image cropping complete");
 			return reglist;

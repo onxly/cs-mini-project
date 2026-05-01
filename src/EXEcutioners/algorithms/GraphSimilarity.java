@@ -5,6 +5,9 @@ import java.util.Iterator;
 import EXEcutioners.adts.abstractClasses.Edge;
 import EXEcutioners.adts.abstractClasses.MapGraph;
 import EXEcutioners.adts.abstractClasses.Vertex;
+import EXEcutioners.adts.graph.GraphNode;
+import EXEcutioners.adts.graph.ImageGraph;
+import EXEcutioners.adts.interfaces.IEdge;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 import EXEcutioners.dummy.Graph;
@@ -14,10 +17,10 @@ import EXEcutioners.dummy.RegionNode;
 public class GraphSimilarity {
 	
 	private Double score;
-	private Graph graphA;
-	private Graph graphB;
+	private ImageGraph graphA;
+	private ImageGraph graphB;
 	
-	public GraphSimilarity(Graph graphA, Graph graphB) {
+	public GraphSimilarity(ImageGraph graphA, ImageGraph graphB) {
 		score = null;
 		this.graphA = graphA;
 		this.graphB = graphB;
@@ -31,20 +34,20 @@ public class GraphSimilarity {
 		return this.score;
 	}
 	
-	public Graph getGraphA() {
+	public ImageGraph getGraphA() {
 		return this.graphA;
 	}
 	
-	public Graph getGraphB() {
+	public ImageGraph getGraphB() {
 		return this.graphB;
 	}
 	
-	public void setGraphA(Graph graph) {
+	public void setGraphA(ImageGraph graph) {
 		this.graphA = graph;
 		this.score = null;
 	}
 	
-	public void setGraphB(Graph graph) {
+	public void setGraphB(ImageGraph graph) {
 		this.graphB = graph;
 		this.score = null;
 	}
@@ -55,23 +58,23 @@ public class GraphSimilarity {
 		
 	}
 	
-	public static Double calculateScore(Graph a, Graph b) {
+	public static Double calculateScore(ImageGraph a, ImageGraph b) {
 		
 		Double totalDistance = 0.0;
 		
-		Iterator<RegionNode> regionsA =  a.getRegions().iterator();
+		Iterator<IVertex<GraphNode>> regionsA =  a.vertices().iterator();
 		
 		while(regionsA.hasNext()) {
 			
-			RegionNode i = regionsA.next();
+			GraphNode i = regionsA.next().getElement();
 			
 			Double minDistance = null;
 			
-			Iterator<RegionNode> regionsB =  b.getRegions().iterator();
+			Iterator<IVertex<GraphNode>> regionsB =  b.vertices().iterator();
 			
 			while(regionsB.hasNext()) {
 				
-				RegionNode j = regionsB.next();
+				GraphNode j = regionsB.next().getElement();
 				
 				Double distance = calculateDistance(i,j);
 				
@@ -85,14 +88,14 @@ public class GraphSimilarity {
 			
 		}
 		
-		return 1.0/(1.0+(totalDistance/a.getRegions().size()));
+		return 1.0/(1.0+(totalDistance/a.numVertices()));
 	}
 	
 	
-	public static Double calculateDistance(RegionNode a, RegionNode b) {
+	public static Double calculateDistance(GraphNode a, GraphNode b) {
 		
-		Double[] featuresA = a.getFeatures();
-		Double[] featuresB = b.getFeatures();
+		double[] featuresA = a.getRegionVector();
+		double[] featuresB = b.getRegionVector();
 		
 		Double sum = 0.0;
 		Double finalDistance;
@@ -106,7 +109,32 @@ public class GraphSimilarity {
 			
 		}
 		
-		finalDistance = (0.1 * Math.abs(a.getAvgWeight() - b.getAvgWeight())) + (0.2 * Math.abs(a.getDegree() - b.getDegree())) + (0.7 * Math.sqrt(sum));
+		Iterator<IEdge<String, Double>> edgesA = a.getOutgoing().values().iterator();
+		Iterator<IEdge<String, Double>> edgesB = b.getOutgoing().values().iterator();
+		
+		Double sumA = 0.0;
+		Double sumB = 0.0;
+		
+		while(edgesA.hasNext()) {
+			
+			sumA += edgesA.next().getElement();
+			
+		}
+		
+		while(edgesB.hasNext()) {
+			
+			sumB += edgesB.next().getElement();
+			
+		}
+		
+		int degreeA = a.getOutgoing().size();
+		int degreeB = b.getOutgoing().size();
+		
+		Double avgWeightA = sumA/a.getOutgoing().size();
+		Double avgWeightB = sumB/b.getOutgoing().size();
+		
+		
+		finalDistance = (0.1 * Math.abs(avgWeightA - avgWeightB)) + (0.2 * Math.abs(degreeA - degreeB)) + (0.7 * Math.sqrt(sum));
 		
 		return finalDistance;
 	}

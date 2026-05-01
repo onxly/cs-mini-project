@@ -14,9 +14,17 @@ public class ImageGraph extends MapGraph<GraphNode, Double> {
 	private LinkedPositionalList<GraphNode> nodes;
 	private int k = 0;
 	
+	private String animalName;
+	
 	public ImageGraph(int kValue) {
 		super(false);
 		this.k = kValue;
+	}
+	
+	public ImageGraph(int kValue, String animal) {
+		super(false);
+		this.k = kValue;
+		this.animalName = animal;
 	}
 	
 	
@@ -48,6 +56,16 @@ public class ImageGraph extends MapGraph<GraphNode, Double> {
 				super.insertEdge((IVertex)node, (IVertex) node2, dis);
 			}
 		}
+	}
+	
+	public void setAnimalName(String animal) {
+		
+		this.animalName = animal;
+		
+	}
+	
+	public String getAnimalName() {
+		return this.animalName;
 	}
 	
 }

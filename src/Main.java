@@ -1,3 +1,5 @@
+import java.util.Iterator;
+
 import EXEcutioners.GUI.HelperClasses.SplashScreen;
 import EXEcutioners.GUI.UserInterfaces.SelectionInterface;
 import javafx.application.Application;
@@ -10,8 +12,6 @@ public class Main extends Application  {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ImageProcessor.processImg("guts-artwork-5120x2880-21418.jpg");
-		
 		launch(args);
 	}
 

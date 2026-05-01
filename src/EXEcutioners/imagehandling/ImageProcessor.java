@@ -47,6 +47,7 @@ public class ImageProcessor {
 			}
 
 			System.out.println("Image cropping complete");
+			return reglist;
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

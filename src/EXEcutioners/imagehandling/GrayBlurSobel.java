@@ -3,7 +3,7 @@ package EXEcutioners.imagehandling;
 import java.awt.image.BufferedImage;
 
 public class GrayBlurSobel {
-	public static BufferedImage GetSobelImage(String filename) {
-		return GreysScaleApplier.ConvertToGreyScale(filename);
+	public static BufferedImage GetSobelImage(BufferedImage file) {
+		return GreysScaleApplier.ConvertToGreyScale(file);
 	}
 }

@@ -82,12 +82,7 @@ public class SobelOperator {
 					Sobelimage.setRGB(x, y, SobelRGB);
 				}
 			}
-			try {
-				ImageIO.write(Sobelimage, "jpg", new File("Sobelimage.jpg"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 			return Sobelimage;
 		}
 		

@@ -1,11 +1,21 @@
 package EXEcutioners.GUI.UserInterfaces;
 
 import EXEcutioners.GUI.interfaces.IPreviousHelper;
+import EXEcutioners.adts.abstractClasses.LinkedPositionalList;
 import EXEcutioners.imagehandling.GrayBlurSobel;
+import EXEcutioners.imagehandling.ImageProcessor;
+import EXEcutioners.imagehandling.LinkedRegionalList;
+import EXEcutioners.imagehandling.Region;
+import EXEcutioners.imagehandling.RegionFeature;
+import EXEcutioners.imagehandling.RegionList;
 
-
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -69,14 +79,46 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 	
 	public void onLeftDroppedFile(ArrayList<File> Files)
 	{
-		GrayBlurSobel.GetSobelImage(Files.getFirst().getAbsolutePath());
+		
+		LinkedRegionalList ImageRegionList = new LinkedRegionalList();
+
+		for (File f: Files ) {
+		//per image break up the image into region and add them into the list;
+		ImageRegionList.AddImageRegions(ImageProcessor.processImg(f.getAbsolutePath()));//regions of said image;
+		System.out.println("got past adding: "+ImageRegionList.getSize());
+		
+			
+		}
+		for (Iterator<LinkedPositionalList<RegionFeature>> iterator = ImageRegionList.getPerImagelists().iterator(); iterator.hasNext();) {
+			
+			
+			//this is what he needs( feme that is)
+			System.out.println("line needed for feme :"+ "Comparisioninterface.java: line 97");
+			LinkedPositionalList<RegionFeature>  listofRegions = (LinkedPositionalList<RegionFeature>) iterator.next();
+			System.out.println("welp");
+			int r=1;
+			for (Iterator i = listofRegions.iterator(); i.hasNext();) {
+				RegionFeature R = (RegionFeature) i.next();
+				System.out.println("region :"+r+" "+R.toString());
+				try {
+					ImageIO.write(R.getSobelImage(), "jpg", new File("Sob"+r+".jpg"));
+					ImageIO.write(R.getOrigionalimage(), "jpg", new File("Org"+r+".jpg"));
+					r++;
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+
+		
 		PopulateBox(ImageSpotLeft, Files, left);
 	}
 	public void onRightDroppedFile(ArrayList<File> Files)
 	{
 	
 		//ImagesHolder.getChildren().addAll(ImageSpotRight,Right);
-		GrayBlurSobel.GetSobelImage(Files.getFirst().getAbsolutePath());
+		//GrayBlurSobel.GetSobelImage(Files.getFirst().getAbsolutePath());
 		PopulateBox(ImageSpotRight,Files, Right);
 	}
 	public void PopulateBox(TextArea A, ArrayList<File> Files,ScrollPane scroll)

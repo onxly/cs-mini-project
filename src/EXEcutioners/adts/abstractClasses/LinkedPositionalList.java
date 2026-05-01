@@ -13,7 +13,7 @@ public class LinkedPositionalList<E> implements IPositionalList<E>, Iterable<E> 
 		
 		@Override
 		public boolean hasNext() {
-			if (current == null) {
+			if (cursor == null) {
 				return false;
 			} else {
 				return true;

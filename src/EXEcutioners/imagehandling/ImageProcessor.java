@@ -46,6 +46,7 @@ public class ImageProcessor {
 				}
 			}
 						
+			
 			/*for testing purposes
 			 * int i=0;
 			for(Region img:reglist)
@@ -55,6 +56,7 @@ public class ImageProcessor {
 			}*/
 
 			System.out.println("Image cropping complete");
+			return reglist;
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

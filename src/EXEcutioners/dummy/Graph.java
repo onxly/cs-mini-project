@@ -22,4 +22,9 @@ public class Graph implements Serializable{
 	public String getName() {
 		return this.name;
 	}
+	
+	public double[] getFeatures() {
+		double[] v = {1.0, 3.2};
+		return v;
+	}
 }

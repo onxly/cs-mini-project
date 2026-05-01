@@ -89,10 +89,6 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		ImageRegionList.AddImageRegions(ImageProcessor.processImg(f.getAbsolutePath()));//regions of said image;
 		System.out.println("got past adding: "+ImageRegionList.getSize());
 		
-		/*for (Iterator<Iterable<GraphNode>> iterator = ImageRegionList.getGraphNodeList().iterator(); iterator.hasNext();) {
-			Iterable<GraphNode> file = (Iterable<GraphNode>) iterator.next();
-			
-		}*/
 		
 			
 		}

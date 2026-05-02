@@ -8,6 +8,7 @@ import EXEcutioners.adts.graph.ImageGraph;
 import EXEcutioners.adts.interfaces.IEdge;
 import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.interfaces.IVertex;
+import EXEcutioners.algorithms.GraphSimilarity;
 import EXEcutioners.imagehandling.GrayBlurSobel;
 import EXEcutioners.imagehandling.ImageProcessor;
 import EXEcutioners.imagehandling.LinkedRegionalList;
@@ -41,6 +42,9 @@ import EXEcutioners.GUI.HelperClasses.DragFilehandler;
 import EXEcutioners.GUI.HelperClasses.WindowHandler;
 public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 
+	private ImageGraph graphA;
+	private ImageGraph graphB;
+	
 	private Button SelectLeftImages = new Button("Select Images");
 	private Button SelectRightImages = new Button("Select Images");
 	
@@ -83,6 +87,19 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		this.setCenter(Combine);
 	}
 	
+	public void compareGraphs() {
+		
+		if(graphA == null || graphB == null) {
+			System.err.println("No graphs to compare!!!");
+			return;
+		}
+		
+		Double score = GraphSimilarity.calculateScore(graphA, graphB);
+		
+		System.out.println("Similarity score: " + score);
+		
+	}
+	
 	public void onLeftDroppedFile(ArrayList<File> Files)
 	{
 		
@@ -102,7 +119,10 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		}
 		IG.buildGraph(listofRegions);
 		
-		IG.drawGraph();
+		this.graphA = IG;
+		
+		//IG.drawGraph();
+		
 		PopulateBox(ImageSpotLeft, Files, left);
 	}
 				
@@ -112,6 +132,29 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 	
 		//ImagesHolder.getChildren().addAll(ImageSpotRight,Right);
 		//GrayBlurSobel.GetSobelImage(Files.getFirst().getAbsolutePath());
+		
+		LinkedRegionalList ImageRegionList = new LinkedRegionalList();
+
+		for (File f: Files ) {
+		//per image break up the image into region and add them into the list;
+		ImageRegionList.AddImageRegions(ImageProcessor.processImg(f.getAbsolutePath()));//regions of said image;
+		System.out.println("got past adding: "+ImageRegionList.getSize());
+		}
+		
+		Iterator<Iterable<GraphNode>> iteList = ImageRegionList.getGraphNodeList().iterator();
+		Iterable<GraphNode> listofRegions = null;
+		ImageGraph IG = new ImageGraph(3);
+		if (iteList.hasNext()) {
+			listofRegions = iteList.next();
+		}
+		IG.buildGraph(listofRegions);
+		
+		this.graphB = IG;
+		
+		//IG.drawGraph();
+		
+		compareGraphs();
+		
 		PopulateBox(ImageSpotRight,Files, Right);
 	}
 	public void PopulateBox(TextArea A, ArrayList<File> Files,ScrollPane scroll)

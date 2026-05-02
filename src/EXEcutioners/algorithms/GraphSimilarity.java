@@ -8,6 +8,7 @@ import EXEcutioners.adts.abstractClasses.Vertex;
 import EXEcutioners.adts.graph.GraphNode;
 import EXEcutioners.adts.graph.ImageGraph;
 import EXEcutioners.adts.interfaces.IEdge;
+import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 import EXEcutioners.dummy.Graph;
@@ -62,19 +63,19 @@ public class GraphSimilarity {
 		
 		Double totalDistance = 0.0;
 		
-		Iterator<IVertex<GraphNode>> regionsA =  a.vertices().iterator();
+		Iterator<IVertex<IEntry<Integer[], Double[]>>> regionsA =  a.vertices().iterator();
 		
 		while(regionsA.hasNext()) {
 			
-			GraphNode i = regionsA.next().getElement();
+			IVertex<IEntry<Integer[], Double[]>> i = regionsA.next();
 			
 			Double minDistance = null;
 			
-			Iterator<IVertex<GraphNode>> regionsB =  b.vertices().iterator();
+			Iterator<IVertex<IEntry<Integer[], Double[]>>> regionsB =  b.vertices().iterator();
 			
 			while(regionsB.hasNext()) {
 				
-				GraphNode j = regionsB.next().getElement();
+				IVertex<IEntry<Integer[], Double[]>> j = regionsB.next();
 				
 				Double distance = calculateDistance(i,j);
 				
@@ -92,10 +93,10 @@ public class GraphSimilarity {
 	}
 	
 	
-	public static Double calculateDistance(GraphNode a, GraphNode b) {
+	public static Double calculateDistance(IVertex<IEntry<Integer[], Double[]>> a, IVertex<IEntry<Integer[], Double[]>> b) {
 		
-		double[] featuresA = a.getRegionVector();
-		double[] featuresB = b.getRegionVector();
+		Double[] featuresA = a.getElement().getValue();
+		Double[] featuresB = b.getElement().getValue();
 		
 		Double sum = 0.0;
 		Double finalDistance;
@@ -109,8 +110,11 @@ public class GraphSimilarity {
 			
 		}
 		
-		Iterator<IEdge<String, Double>> edgesA = a.getOutgoing().values().iterator();
-		Iterator<IEdge<String, Double>> edgesB = b.getOutgoing().values().iterator();
+		Vertex<IEntry<Integer[], Double[]>, Double> aV = (Vertex<IEntry<Integer[], Double[]>, Double>) a;
+		Vertex<IEntry<Integer[], Double[]>, Double> bV = (Vertex<IEntry<Integer[], Double[]>, Double>) b;
+		
+		Iterator<IEdge<IEntry<Integer[], Double[]>, Double>> edgesA = aV.getOutgoing().values().iterator();
+		Iterator<IEdge<IEntry<Integer[], Double[]>, Double>> edgesB = bV.getOutgoing().values().iterator();
 		
 		Double sumA = 0.0;
 		Double sumB = 0.0;
@@ -127,11 +131,11 @@ public class GraphSimilarity {
 			
 		}
 		
-		int degreeA = a.getOutgoing().size();
-		int degreeB = b.getOutgoing().size();
+		int degreeA = aV.getOutgoing().size();
+		int degreeB = bV.getOutgoing().size();
 		
-		Double avgWeightA = sumA/a.getOutgoing().size();
-		Double avgWeightB = sumB/b.getOutgoing().size();
+		Double avgWeightA = sumA/degreeA;
+		Double avgWeightB = sumB/degreeB;
 		
 		
 		finalDistance = (0.1 * Math.abs(avgWeightA - avgWeightB)) + (0.2 * Math.abs(degreeA - degreeB)) + (0.7 * Math.sqrt(sum));

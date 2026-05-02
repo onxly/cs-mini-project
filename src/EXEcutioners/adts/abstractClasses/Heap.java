@@ -53,21 +53,27 @@ public class Heap<K, V> extends BinaryTree<IEntry<K,V>> implements IPriorityQueu
 		BinaryNode<IEntry<K, V>> insertNode = null;
 		IEntry<K, V> val = new PQEntry<K, V>(key, value); 
 		if (super.isEmpty()) {
-			PQEntry<K,V> newEntry = new PQEntry<K,V>(key, value);
-			super.addRoot(newEntry);
-			insertNode = super.root;
-			_size++;
+			root = new BinaryNode<IEntry<K,V>>(null, new BinaryNode<IEntry<K,V>>(null, null, null, null), 
+					new BinaryNode<IEntry<K,V>>(null, null, null, null),
+					new PQEntry<K,V>(key, value));
 			root.getLeft().setParent(root);
 			root.getRight().setParent(root);
+			insertNode = super.root;
+			_size++;
+			
 			lastNode = root.getLeft();
 		} else {
 			//add the node to the last position			
 			lastNode.setElement(new PQEntry<K,V>(key, value));
-			lastNode.setLeft(new BinaryNode<IEntry<K,V>>(lastNode, null, null, null));
-			lastNode.setRight(new BinaryNode<IEntry<K,V>>(lastNode, null, null, null));
-			insertNode = lastNode;
-			lastNode = getLastNodeInsert(lastNode);
-			_size++;
+		    
+		    // 2. Create the new empty "External Nodes" for future insertions
+		    lastNode.setLeft(new BinaryNode<IEntry<K,V>>(lastNode, null, null, null));
+		    lastNode.setRight(new BinaryNode<IEntry<K,V>>(lastNode, null, null, null));
+		    
+		    // 3. Move the pointer to the newly filled node, then calculate the next empty spot
+		    insertNode = lastNode;
+		    lastNode = getLastNodeInsert(lastNode);
+		    _size++;
 		}
 		upheap(insertNode);
 		return val;
@@ -104,96 +110,102 @@ public class Heap<K, V> extends BinaryTree<IEntry<K,V>> implements IPriorityQueu
 	}
 
 	private void upheap(BinaryNode<IEntry<K,V>> node) {
-		BinaryNode<IEntry<K,V>> parent = node.getParent();
-		if (parent != null) {
-			IEntry<K,V> entry = node.getElement();
-			IEntry<K,V> entParent = parent.getElement();
-			if (comp.compare(entry.getKey(), entParent.getKey()) > 0) {
-				PQEntry<K,V> newEntry = new PQEntry<>(entParent.getKey(), entParent.getValue());
-				PQEntry<K,V> newParent = new PQEntry<K,V>(entry.getKey(), entry.getValue());
-				entry = newEntry;
-				entParent = newParent;
-				upheap(parent);
-			}
-		}
+	    BinaryNode<IEntry<K,V>> parent = node.getParent();
+	    
+	    if (parent == null || parent.getElement() == null) {
+	        return;
+	    }
+
+	    if (comp.compare(node.getElement().getKey(), parent.getElement().getKey()) < 0) {
+	        IEntry<K,V> temp = node.getElement();
+	        node.setElement(parent.getElement());
+	        parent.setElement(temp);
+	        
+	        upheap(parent);
+	    }
 	}
 	
 	private void downheap(BinaryNode<IEntry<K,V>> node) {
-		if (node.getLeft().getElement() != null || node.getRight().getElement() != null) {
-			BinaryNode<IEntry<K,V>> smallest = null;
-			if (node.getLeft().getElement() == null) {
-				smallest = node.getRight();
-				
-			} else if (node.getRight().getElement() == null) {
-				smallest = node.getLeft();
-			} else {
-				BinaryNode<IEntry<K,V>> left = node.getLeft();
-				BinaryNode<IEntry<K,V>> right = node.getRight();
-				if (comp.compare(left.getElement().getKey(), right.getElement().getKey()) < 0) {
-					smallest = left;
-				} else {
-					smallest = right;
-				}
-				
-			}
-			
-			IEntry<K,V> entry = node.getElement();
-			IEntry<K,V> entChild = smallest.getElement();
-			if (comp.compare(entry.getKey(), entChild.getKey())  >= 0) {
-				PQEntry<K,V> newEntry = new PQEntry<>(entChild.getKey(), entChild.getValue());
-				PQEntry<K,V> newChild = new PQEntry<K,V>(entry.getKey(), entry.getValue());
-				entry = newEntry;
-				entChild = newChild;
-				downheap(smallest);
-			}
-			
-		}
+	    if (node == null || node.getElement() == null) return;
+
+	    boolean hasLeft = node.getLeft() != null && node.getLeft().getElement() != null;
+	    boolean hasRight = node.getRight() != null && node.getRight().getElement() != null;
+
+	    if (!hasLeft && !hasRight) return;
+
+	    BinaryNode<IEntry<K,V>> smallest = null;
+
+	    if (hasLeft && !hasRight) {
+	        smallest = node.getLeft();
+	    } else if (!hasLeft && hasRight) {
+	        smallest = node.getRight();
+	    } else {
+	       
+	        if (comp.compare(node.getLeft().getElement().getKey(), 
+	                         node.getRight().getElement().getKey()) < 0) {
+	            smallest = node.getLeft();
+	        } else {
+	            smallest = node.getRight();
+	        }
+	    }
+
+
+	    if (smallest != null && comp.compare(node.getElement().getKey(), 
+	                                         smallest.getElement().getKey()) > 0) {
+	        IEntry<K,V> temp = node.getElement();
+	        node.setElement(smallest.getElement());
+	        smallest.setElement(temp);
+	        
+	        // Continue down the tree
+	        downheap(smallest);
+	    }
 	}
 	
 	private BinaryNode<IEntry<K,V>> getLastNodeRemove(BinaryNode<IEntry<K,V>> node) {
-		BinaryNode<IEntry<K,V>> parent = node.getParent();
-		if (parent.getRight() == node) {
-			return parent.getLeft();
-		}
+	    BinaryNode<IEntry<K,V>> p = node.getParent();
+	    
+	    
+	    if (p != null && p.getRight() == node) {
+	        return p.getLeft();
+	    }
 
-		BinaryNode<IEntry<K,V>> currentNode = node.getParent();
-		parent = currentNode.getParent();
-		while (!isRoot(currentNode) && parent.getRight() == currentNode) {
-			currentNode = currentNode.getParent();
-			parent = currentNode.getParent();
-		}
-		
-		if (!isRoot(currentNode) && parent.getRight() == currentNode) {
-			currentNode = (BinaryNode<IEntry<K, V>>) sibling(currentNode);
-		}
+	    BinaryNode<IEntry<K,V>> curr = node;
+	    while (curr.getParent() != null && curr.getParent().getLeft() == curr) {
+	        curr = curr.getParent();
+	    }
 
-		while (currentNode.getLeft().getElement() != null || currentNode.getRight().getElement() != null) {
-			currentNode = currentNode.getRight();
-		}
+	    if (curr.getParent() != null) {
+	        curr = curr.getParent().getLeft();
+	    }
 
-		return currentNode;
+	    
+	    while (curr.getRight() != null && curr.getRight().getElement() != null) {
+	        curr = curr.getRight();
+	    }
+	    return curr;
 	}
 	
 	private BinaryNode<IEntry<K,V>> getLastNodeInsert(BinaryNode<IEntry<K,V>> node) {
-		BinaryNode<IEntry<K,V>> parent = node.getParent();
-		if (parent.getLeft() == node) {
-			return (BinaryNode<IEntry<K, V>>) sibling(node);
-		}
-		
-		BinaryNode<IEntry<K,V>> currentNode = node.getParent();
-		parent = currentNode.getParent();
-		while (!isRoot(currentNode) && parent.getLeft() == currentNode) {
-			currentNode = currentNode.getParent();
-		}
-		
-		if (!isRoot(currentNode) && parent.getLeft() == currentNode) {
-			currentNode = (BinaryNode<IEntry<K, V>>) sibling(currentNode);
-		}
+	    BinaryNode<IEntry<K,V>> p = node.getParent();
+	    if (p != null && p.getLeft() == node) {
+	        return p.getRight(); 
+	    }
 
-		while (!isExternal(currentNode)) {
-			currentNode = currentNode.getLeft();
-		}
-		return currentNode;
+	    
+	    BinaryNode<IEntry<K,V>> curr = node;
+	    while (curr.getParent() != null && curr.getParent().getRight() == curr) {
+	        curr = curr.getParent();
+	    }
+
+
+	    if (curr.getParent() != null) {
+	        curr = curr.getParent().getRight();
+	    }
+
+	    while (curr.getLeft() != null) {
+	        curr = curr.getLeft();
+	    }
+	    return curr;
 	}
 	
 }

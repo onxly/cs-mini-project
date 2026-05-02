@@ -113,7 +113,10 @@ public class HashMap<K, V> implements IMap<K, V> {
 	}
 	
 	
-	private void createTable() {};
+	private void createTable() {
+		table=(TableMap<K,V>[ ]) new TableMap[capacity];
+	};
+	
 	private V bucketGet(int h,K k) 
 	{
 		TableMap<K,V> bucket= table[h];
@@ -127,6 +130,7 @@ public class HashMap<K, V> implements IMap<K, V> {
 		
 	private V bucketPut(int h,K k,V v) {
 		TableMap<K,V>bucket = table[h];
+		
 		if (bucket == null) {
 			table[h]= new TableMap<>();
 			bucket = table[h];
@@ -167,6 +171,7 @@ public class HashMap<K, V> implements IMap<K, V> {
 
 	@Override
 	public V put(K key, V value) {
+		
 		V oldValue = bucketPut(hashValue(key), key, value);
 		
 		if (_size > capacity) {

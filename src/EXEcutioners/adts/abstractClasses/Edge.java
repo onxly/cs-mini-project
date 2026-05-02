@@ -11,7 +11,7 @@ public class Edge<V, E> implements IEdge<V, E>  {
 	
 	public Edge(IVertex<V> a, IVertex<V> b, E elm) {
 		this.element = elm;
-		endpoints = (IVertex<V>[]) new Object[2];
+		endpoints = (IVertex<V>[]) new IVertex[2];
 		endpoints[0] = a;
 		endpoints[1] = b;
 	}

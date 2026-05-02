@@ -24,6 +24,7 @@ public class LinkedRegionalList {
 		for (Iterator r = list.iterator(); r.hasNext();) 
 		{
 			Region reg = (Region) r.next();
+			
 			BufferedImage Origional = reg.getImage();
 			BufferedImage Sobel = GrayBlurSobel.GetSobelImage(reg.getImage());
 			//Currently a Region with identified Features
@@ -34,6 +35,7 @@ public class LinkedRegionalList {
 			//Adding up all the regions of said feature
 			RegionFeatures.addLast(RegionWithFeature);//List of image features;
 			//Adding "list of 'feature'( which is basically the whole image) " for "nth" image;
+			
 			GraphNodeList.addLast(nodeFeatures);
 					
 		}

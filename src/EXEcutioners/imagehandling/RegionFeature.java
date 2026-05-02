@@ -79,8 +79,14 @@ public class RegionFeature {
 			Dvector[i] = (Double) d;
 			i++;
 		}
-		String Positions=x+""+y;
-		GraphNode GN = new GraphNode(Positions, Dvector);
+		
+		Integer[] INTPos = new Integer[2];
+		INTPos[0] = x;
+		INTPos[1] = y;
+		
+		
+		GraphNode GN = new GraphNode(INTPos, Dvector);
+		
 		return GN;	
 	}
 	

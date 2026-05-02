@@ -6,6 +6,7 @@ import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 
 public class Vertex<V, E> implements IVertex<V>  {
+	 private String name = "";
 	 private V element;
 	 private IPosition <IVertex<V>> pos;
 	 private HashMap<IVertex<V>, IEdge<V,E>> outgoing;
@@ -23,6 +24,17 @@ public class Vertex<V, E> implements IVertex<V>  {
 		 
 	 }
 	 
+	 
+	 public String getName() {
+		return name;
+	}
+
+
+	 public void setName(String name) {
+		 this.name = name;
+	 }
+
+
 	 @Override
 	 public V getElement() {
 		return this.element;
@@ -36,11 +48,11 @@ public class Vertex<V, E> implements IVertex<V>  {
 		 this.pos = p;
 	 }
 	 
-	 public IMap<IVertex<V>, IEdge<V, E>> getOutgoing() {
+	 public HashMap<IVertex<V>, IEdge<V, E>> getOutgoing() {
 		 return outgoing;
 	}
 	 
-	 public IMap<IVertex<V>, IEdge<V, E>> getIncoming() {
+	 public HashMap<IVertex<V>, IEdge<V, E>> getIncoming() {
 		 return incoming;
 	}
 }

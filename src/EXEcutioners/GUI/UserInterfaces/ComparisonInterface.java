@@ -2,8 +2,12 @@ package EXEcutioners.GUI.UserInterfaces;
 
 import EXEcutioners.GUI.interfaces.IPreviousHelper;
 import EXEcutioners.adts.abstractClasses.LinkedPositionalList;
+import EXEcutioners.adts.abstractClasses.Vertex;
 import EXEcutioners.adts.graph.GraphNode;
 import EXEcutioners.adts.graph.ImageGraph;
+import EXEcutioners.adts.interfaces.IEdge;
+import EXEcutioners.adts.interfaces.IEntry;
+import EXEcutioners.adts.interfaces.IVertex;
 import EXEcutioners.imagehandling.GrayBlurSobel;
 import EXEcutioners.imagehandling.ImageProcessor;
 import EXEcutioners.imagehandling.LinkedRegionalList;
@@ -88,20 +92,21 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		//per image break up the image into region and add them into the list;
 		ImageRegionList.AddImageRegions(ImageProcessor.processImg(f.getAbsolutePath()));//regions of said image;
 		System.out.println("got past adding: "+ImageRegionList.getSize());
-		
-		
-			
 		}
-		for (Iterator<Iterable<GraphNode>> iterator = ImageRegionList.getGraphNodeList().iterator(); iterator.hasNext();) {
-			ImageGraph IG = new ImageGraph(3);
-			Iterable<GraphNode> listofRegions = (Iterable<GraphNode>) iterator.next();
-			
-			IG.buildGraph(listofRegions);
-		}
-
 		
+		Iterator<Iterable<GraphNode>> iteList = ImageRegionList.getGraphNodeList().iterator();
+		Iterable<GraphNode> listofRegions = null;
+		ImageGraph IG = new ImageGraph(3);
+		if (iteList.hasNext()) {
+			listofRegions = iteList.next();
+		}
+		IG.buildGraph(listofRegions);
+		
+		IG.drawGraph();
 		PopulateBox(ImageSpotLeft, Files, left);
 	}
+				
+				
 	public void onRightDroppedFile(ArrayList<File> Files)
 	{
 	

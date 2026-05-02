@@ -1,6 +1,7 @@
 package EXEcutioners.adts.abstractClasses;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import EXEcutioners.adts.interfaces.IEdge;
@@ -106,7 +107,7 @@ public class MapGraph<V, E> implements IGraph<V, E>{
 	}
 
 	@Override
-	public IVertex<V> insertVertex(V elm) {
+	public Vertex<V, E> insertVertex(V elm) {
 		Vertex<V, E> vertex = new Vertex<>(elm, this.isDirected);
 		vertex.setPosition(vertices.addLast(vertex));
 		return vertex;
@@ -114,11 +115,15 @@ public class MapGraph<V, E> implements IGraph<V, E>{
 
 	@Override
 	public IEdge<V, E> insertEdge(IVertex<V> start, IVertex<V> end, E elm) throws IllegalArgumentException {
+		
 		if (getEdge(start, end) == null) {
-			Edge<V, E> edge = new Edge<>(start, end, elm);
+			Edge<V, E> edge = new Edge<V, E>(start, end, elm);
 			edge.setPosition(edges.addLast(edge));
 			Vertex<V, E> origin = validateVertex(start);
 			Vertex<V, E> dest = validateVertex(end);
+			
+			origin.getOutgoing().put(end, edge);
+			dest.getIncoming().put(start, edge);
 			return edge;
 		} else {
 			throw new IllegalArgumentException("Edge from start to end already exists");
@@ -141,14 +146,37 @@ public class MapGraph<V, E> implements IGraph<V, E>{
 
 	@Override
 	public E removeEdge(IEdge<V, E> edge) {
-		return null;
+		Edge<V, E> newEdge = validateEdge(edge);
+		E oldElm = newEdge.getElement();
+	    if (newEdge != null) {
+	    	IVertex<V>[] points = newEdge.getEndpoints();
+	    	Vertex<V, E> source = validateVertex(points[0]);
+	    	Vertex<V, E> destination = validateVertex(points[0]);
+
+		    HashMap<IVertex<V>, IEdge<V, E>> srcEdges = (HashMap<IVertex<V>, IEdge<V, E>>) source.getOutgoing();
+		    HashMap<IVertex<V>, IEdge<V, E>> destEdges = (HashMap<IVertex<V>, IEdge<V, E>>) source.getOutgoing();
+		    srcEdges.remove(destination);
+		    destEdges.remove(source);
+		    edges.remove(edge.getPosition());
+		    return oldElm;
+	    } else {
+	    	return null;
+	    }
+
+	    
 	}
 
 	@Override
 	public IEdge<V, E> getEdge(IVertex<V> v1, IVertex<V> v2) {
 		Vertex<V, E> vertex = validateVertex(v1);
+		if (vertex.getOutgoing() != null ) {	
+
+			return vertex.getOutgoing().get(v2);
 		
-		return vertex.getOutgoing().get(v2);
+		} else {
+			return null;
+		}
+		
 	}
 
 }

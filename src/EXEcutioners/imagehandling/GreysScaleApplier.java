@@ -8,12 +8,12 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class GreysScaleApplier {
-	public static BufferedImage ConvertToGreyScale(String file)
+	public static BufferedImage ConvertToGreyScale(BufferedImage file)
 	{
 	
 		BufferedImage GrayScaleImage = null;
 		try {
-			BufferedImage OrigionalImage = ImageIO.read(new File(file));
+			BufferedImage OrigionalImage = file;
 			int Width = OrigionalImage.getWidth();
 			int Height = OrigionalImage.getHeight();
 			
@@ -31,10 +31,10 @@ public class GreysScaleApplier {
 					GrayScaleImage.setRGB(x, y, grayRGB);
 				}
 			}
-			ImageIO.write(GrayScaleImage,"jpg",new File("Gray.jpg"));
+			//ImageIO.write(GrayScaleImage,"jpg",new File("Gray.jpg"));
 			SobelOperator.SobelOperatorApplier(GaussianBlurApplier.ConvertToBlur(GrayScaleImage));
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			System.err.println("Something went wrong while trying to read the image");

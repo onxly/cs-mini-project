@@ -191,7 +191,7 @@ public class BinaryTree<E> implements ITree<E> {
 	public E remove(IPosition<E> p) throws IllegalArgumentException{
 		BinaryNode<E> node = validate(p);
 		if(numChildren(p) != 2) {
-			BinaryNode<E> child = (node.getLeft()!=null?node.getLeft() :node.getRight());
+			BinaryNode<E> child = (node.getLeft() !=null ? node.getLeft() :node.getRight());
 			if(child != null) {
 				child.setParent(node.getParent());
 			}

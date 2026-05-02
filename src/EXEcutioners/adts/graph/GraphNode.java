@@ -6,20 +6,21 @@ import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 
-public class GraphNode extends Vertex<String ,Double> {
-	int[] regionPosition;
-    double[] featureVector;
+public class GraphNode extends Vertex<IEntry<Integer[], Double[]> ,Double> {
+	Integer[] regionPosition;
+	Double[] featureVector;
     
-    public GraphNode(int[] regionPosition, double[] featureVector) {
-    	super("Something", false);
+    public GraphNode(Integer[] regionPosition, Double[] featureVector) {
+    	PQEntry<Integer[], Double[]> entry = new PQEntry<Integer[], Double[]>(regionPosition, featureVector);
+    	super(entry, false);
         this.regionPosition = regionPosition;
         this.featureVector = featureVector;
     }
 	
-	public int[] getRegionPos() {
+	public Integer[] getRegionPos() {
 		return this.regionPosition;
 	}
-	public double[] getRegionVector() {
+	public Double[] getRegionVector() {
 		return this.featureVector;
 	}
 

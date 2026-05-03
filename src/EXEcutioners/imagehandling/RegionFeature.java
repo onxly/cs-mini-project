@@ -1,5 +1,6 @@
 package EXEcutioners.imagehandling;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import EXEcutioners.adts.graph.GraphNode;
@@ -15,6 +16,14 @@ public class RegionFeature {
 	private int x=0;
 	private int y=0;
 	
+	private double normR=0;
+	private double normG=0;
+	private double AvgHue=0;
+	private double AvgSat=0;
+	private double AvgBright=0;
+	private double VarR=0;
+	private double VarG=0;
+	private double VarB=0;
 
 	public void setSobelImage(BufferedImage sobelImage) {
 		SobelImage = sobelImage;
@@ -33,8 +42,8 @@ public class RegionFeature {
 	public void CalcSumOfRgb()
 	{
 		int pixelCount=0;
-		int NumWhite=0;//the bright parts..counts them
-		
+		//int NumWhite=0;//the bright parts..counts them
+		double sumH=0, sumS=0, sumBri=0, sumEdge=0;
 		for(int y=0; y<Origionalimage.getHeight();y++)
 		{
 			for(int x =0;x<Origionalimage.getWidth();x++)
@@ -51,24 +60,65 @@ public class RegionFeature {
 				int G=(origRGB>>8)&0xFF;
 				int B=(origRGB)&0xFF;
 				
-				
-				if(r>=128&& g>=128&& b>=128)//bright enough
-				{
-					NumWhite++;
-				}
-				
 				AvgAllRed+=R;
 				AvgAllGreen+=G;
 				AvgAllBlue+=B;
+				
+				float[] hsb = Color.RGBtoHSB(R, G, B, null);
+				sumH+=hsb[0];
+				sumS+=hsb[1];
+				sumBri+=hsb[2];
+				sumEdge+=Math.sqrt(r*r+g*g+b*b);
+				
 			}
 		}
 		AvgAllRed=AvgAllRed/pixelCount;	
 		AvgAllGreen=AvgAllGreen/pixelCount;	
 		AvgAllBlue=AvgAllBlue/pixelCount;
-		EdgeDensity=(double)NumWhite/(double)pixelCount;
-		vector= new double[] {AvgAllRed,AvgAllGreen,AvgAllBlue,EdgeDensity};
+		AvgHue=sumH/pixelCount;
+		AvgSat=sumS/pixelCount;
+		AvgBright=sumBri/pixelCount;
+		
+		double sumAvg= AvgAllRed+AvgAllGreen+AvgAllBlue;
+		normR= sumAvg>0 ? (AvgAllRed/sumAvg) : 0.38; 
+		normG= sumAvg>0 ? (AvgAllGreen/sumAvg) : 0.38; 
+		
+		EdgeDensity=(double)sumEdge/(pixelCount*Math.sqrt(3)*255);
+		calcVariance(pixelCount);
+		
 		
 	}
+	public void calcVariance(int pixelCount)
+	{
+		double SumSqr_R=0;
+		double SumSqr_G=0;
+		double SumSqr_B=0;
+		for(int y=0;y<Origionalimage.getHeight();y++)
+		{
+			for(int x=0;x<Origionalimage.getWidth();x++)
+			{
+				int origRGB=Origionalimage.getRGB(x, y);
+				int R =(origRGB>>16)&0xFF;
+				int G =(origRGB>>8)&0xFF;
+				int B =(origRGB)&0xFF;
+				
+				SumSqr_R += (R-AvgAllRed)*(R-AvgAllRed);
+				SumSqr_G += (G-AvgAllGreen)*(G-AvgAllGreen);
+				SumSqr_B += (B-AvgAllBlue)*(B-AvgAllBlue);
+				
+				
+			}
+		}
+		
+		double maxvar=127.5*127.5;
+		VarR=(SumSqr_R /pixelCount)/maxvar;
+		VarG=(SumSqr_G /pixelCount)/maxvar;
+		VarB=(SumSqr_B /pixelCount)/maxvar;
+		 
+		vector= new double[] {normR,normG,AvgHue,AvgSat,AvgBright,VarR,VarG,VarB,EdgeDensity};
+	}
+	
+	
 	
 	public GraphNode getGraphNode()
 	{

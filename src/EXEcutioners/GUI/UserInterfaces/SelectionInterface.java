@@ -12,8 +12,8 @@ import EXEcutioners.GUI.HelperClasses.WindowHandler;
 
 public class SelectionInterface extends BorderPane {
 
-	private Button SimilarButton= new Button("Similarity");
-	private Button CompareButton= new Button("Comparison");
+	private Button ClassifyButton= new Button("Classify");
+	private Button SimilarityButton= new Button("Similarity");
 	private Button SettingsButton= new Button("Settings");
 	private Button CreditsButton= new Button("Credits");
 	private Button ExitButton= new Button("Exit");
@@ -22,9 +22,8 @@ public class SelectionInterface extends BorderPane {
 	private ComparisonInterface Compare= null;
 	private SettingsInterface  Settings=null;
 	private CreditsInterface  Credits=null;
-
 	
-	private Stage MainStage = new Stage(); 
+	private Stage MainStage = new Stage();
 	private StackPane Container;
 	public SelectionInterface(Stage s, StackPane container)
 	{
@@ -35,17 +34,16 @@ public class SelectionInterface extends BorderPane {
 		Alloc();
 		isClicked();
 		
-	
 	}
 	private void Alloc()
 	{
 		VBox CompareXSimilar = new VBox(20);
-		CompareButton.setPrefSize(400, 50);
-		SimilarButton.setPrefSize(400, 50);
+		SimilarityButton.setPrefSize(400, 50);
+		ClassifyButton.setPrefSize(400, 50);
 		SettingsButton.setPrefSize(400,  50);
 		CreditsButton.setPrefSize(400,  50);
 		ExitButton.setPrefSize(400,  50);
-		CompareXSimilar.getChildren().addAll(SimilarButton,CompareButton, SettingsButton, CreditsButton, ExitButton);
+		CompareXSimilar.getChildren().addAll(ClassifyButton,SimilarityButton, SettingsButton, CreditsButton, ExitButton);
 		//this.getChildren().add(LeecherXSeeder);
 		CompareXSimilar.setAlignment(Pos.CENTER);
 		
@@ -57,7 +55,7 @@ public class SelectionInterface extends BorderPane {
 	private void isClicked()
 	{
 		
-		SimilarButton.setOnAction(new EventHandler<ActionEvent>() {
+		ClassifyButton.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent arg0) {
@@ -69,7 +67,7 @@ public class SelectionInterface extends BorderPane {
 			}
 		});
 		
-		CompareButton.setOnAction(new EventHandler<ActionEvent>() {
+		SimilarityButton.setOnAction(new EventHandler<ActionEvent>() {
 			
 			@Override
 			public void handle(ActionEvent arg0) {
@@ -86,7 +84,7 @@ public class SelectionInterface extends BorderPane {
 			@Override
 			public void handle(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-				Settings =  new  SettingsInterface();
+				Settings =  new SettingsInterface();
 	            Settings.getPreviousScene(Container, SelectionInterface.this, MainStage);
 	            WindowHandler.HandleSwitch(Container, SelectionInterface.this, Settings, "left");
 	            MainStage.setTitle("Similarity Mode");		

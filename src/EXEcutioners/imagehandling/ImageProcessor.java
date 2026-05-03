@@ -24,11 +24,11 @@ public class ImageProcessor {
 	}
 	
 	
-	public static RegionList processImg(String imageName)
+	public static RegionList processImg(BufferedImage imageName)
 	{
 		try {
 			
-			BufferedImage image= ImageIO.read(new File(imageName));
+			BufferedImage image= imageName;
 			
 			int secHeight=image.getHeight()/4;
 			int secWidth=image.getWidth()/4;
@@ -49,7 +49,7 @@ public class ImageProcessor {
 			System.out.println("Image cropping complete");
 			return reglist;
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

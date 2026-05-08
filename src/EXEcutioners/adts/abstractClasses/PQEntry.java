@@ -1,8 +1,10 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
+
 import EXEcutioners.adts.interfaces.IEntry;
 
-public class PQEntry<K,V> implements IEntry<K,V> {
+public class PQEntry<K,V> implements IEntry<K,V>, Serializable {
 	 private K k; //key
 	 private V v; //value
 	 public PQEntry(K key, V value){

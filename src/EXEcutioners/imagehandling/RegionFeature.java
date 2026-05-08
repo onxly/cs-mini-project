@@ -1,4 +1,4 @@
-package EXEcutioners.imagehandling;
+/*package EXEcutioners.imagehandling;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -25,6 +25,7 @@ public class RegionFeature {
 	private double VarG=0;
 	private double VarB=0;
 
+
 	public void setSobelImage(BufferedImage sobelImage) {
 		SobelImage = sobelImage;
 	}
@@ -44,6 +45,7 @@ public class RegionFeature {
 		int pixelCount=0;
 		//int NumWhite=0;//the bright parts..counts them
 		double sumH=0, sumS=0, sumBri=0, sumEdge=0;
+		double[] edgeDirections= new double[8];
 		for(int y=0; y<Origionalimage.getHeight();y++)
 		{
 			for(int x =0;x<Origionalimage.getWidth();x++)
@@ -52,8 +54,8 @@ public class RegionFeature {
 				int origRGB = (Origionalimage.getRGB(x, y));
 				int SobelRGB = (SobelImage.getRGB(x, y));
 				
-				int r=(SobelRGB>>16)&0xFF;
-				int g=(SobelRGB>>8)&0xFF;
+				int r=((SobelRGB>>16)&0xFF)-128;
+				int g=((SobelRGB>>8)&0xFF)-128;
 				int b=(SobelRGB)&0xFF;
 				
 				int R=(origRGB>>16)&0xFF;
@@ -68,7 +70,13 @@ public class RegionFeature {
 				sumH+=hsb[0];
 				sumS+=hsb[1];
 				sumBri+=hsb[2];
-				sumEdge+=Math.sqrt(r*r+g*g+b*b);
+				sumEdge+=b;
+				
+				//getting direction
+				double angle= Math.atan2(g,r);
+				int bucket=(int)((angle+Math.PI)/(2*Math.PI/8))% 8;
+				edgeDirections[bucket]++;
+				
 				
 			}
 		}
@@ -83,12 +91,16 @@ public class RegionFeature {
 		normR= sumAvg>0 ? (AvgAllRed/sumAvg) : 0.38; 
 		normG= sumAvg>0 ? (AvgAllGreen/sumAvg) : 0.38; 
 		
+		for(int i = 0 ; i <8;i++)
+		{
+			edgeDirections[i]/=pixelCount;
+		}
 		EdgeDensity=(double)sumEdge/(pixelCount*Math.sqrt(3)*255);
-		calcVariance(pixelCount);
+		calcVariance(pixelCount,edgeDirections);
 		
 		
 	}
-	public void calcVariance(int pixelCount)
+	public void calcVariance(int pixelCount, double[] edgeDirections)
 	{
 		double SumSqr_R=0;
 		double SumSqr_G=0;
@@ -115,7 +127,14 @@ public class RegionFeature {
 		VarG=(SumSqr_G /pixelCount)/maxvar;
 		VarB=(SumSqr_B /pixelCount)/maxvar;
 		 
-		vector= new double[] {normR,normG,AvgHue,AvgSat,AvgBright,VarR,VarG,VarB,EdgeDensity};
+		vector= new double[] {normR,normG,AvgHue,AvgSat,AvgBright,VarR,VarG,VarB,EdgeDensity,edgeDirections[0],
+																							edgeDirections[1],
+																							edgeDirections[2],
+																							edgeDirections[3],
+																							edgeDirections[4],
+																							edgeDirections[5],
+																							edgeDirections[6],
+																							edgeDirections[7]};
 	}
 	
 	
@@ -196,4 +215,4 @@ public class RegionFeature {
 		return ""+getAvgAllRed()+" "+getAvgAllGreen()+" "+getAvgAllBlue()+" "+getEdgeDensity()+"\n";
 	}
 	
-}
+}*/

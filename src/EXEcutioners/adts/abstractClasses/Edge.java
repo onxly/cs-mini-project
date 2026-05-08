@@ -1,10 +1,12 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
+
 import EXEcutioners.adts.interfaces.IEdge;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 
-public class Edge<V, E> implements IEdge<V, E>  {
+public class Edge<V, E> implements IEdge<V, E>, Serializable  {
 	private E element;
 	private IPosition<IEdge<V, E>> pos;
 	private IVertex<V>[] endpoints;

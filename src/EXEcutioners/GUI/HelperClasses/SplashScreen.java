@@ -10,10 +10,10 @@ public class SplashScreen extends StackPane {
     private Runnable OnFinished;
 
     public SplashScreen() {
-        Label title = new Label("I Cook");
+        Label title = new Label("WildGraph");
         title.setStyle("-fx-font-size: 36px; -fx-text-fill: white;");
 
-        this.setStyle("-fx-background-color: #1a1a2e;");
+        this.setStyle("-fx-background-color: #1d2f23;");
         this.getChildren().add(title);
 
         // Wait 2 seconds, then fade out

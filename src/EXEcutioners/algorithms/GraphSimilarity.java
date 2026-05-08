@@ -5,6 +5,7 @@ import java.util.Iterator;
 import EXEcutioners.adts.abstractClasses.Edge;
 import EXEcutioners.adts.abstractClasses.MapGraph;
 import EXEcutioners.adts.abstractClasses.Vertex;
+import EXEcutioners.adts.graph.AnimalSignature;
 import EXEcutioners.adts.graph.GraphNode;
 import EXEcutioners.adts.graph.ImageGraph;
 import EXEcutioners.adts.interfaces.IEdge;
@@ -18,10 +19,10 @@ import EXEcutioners.dummy.RegionNode;
 public class GraphSimilarity {
 	
 	private Double score;
-	private ImageGraph graphA;
-	private ImageGraph graphB;
+	private AnimalSignature graphA;
+	private AnimalSignature graphB;
 	
-	public GraphSimilarity(ImageGraph graphA, ImageGraph graphB) {
+	public GraphSimilarity(AnimalSignature graphA, AnimalSignature graphB) {
 		score = null;
 		this.graphA = graphA;
 		this.graphB = graphB;
@@ -35,20 +36,20 @@ public class GraphSimilarity {
 		return this.score;
 	}
 	
-	public ImageGraph getGraphA() {
+	public AnimalSignature getGraphA() {
 		return this.graphA;
 	}
 	
-	public ImageGraph getGraphB() {
+	public AnimalSignature getGraphB() {
 		return this.graphB;
 	}
 	
-	public void setGraphA(ImageGraph graph) {
+	public void setGraphA(AnimalSignature graph) {
 		this.graphA = graph;
 		this.score = null;
 	}
 	
-	public void setGraphB(ImageGraph graph) {
+	public void setGraphB(AnimalSignature graph) {
 		this.graphB = graph;
 		this.score = null;
 	}
@@ -59,23 +60,23 @@ public class GraphSimilarity {
 		
 	}
 	
-	public static Double calculateScore(ImageGraph a, ImageGraph b) {
-		
+	public static Double calculateScore(AnimalSignature a, AnimalSignature b) {
+		/*
 		Double totalDistance = 0.0;
 		
-		Iterator<IVertex<IEntry<Integer[], Double[]>>> regionsA =  a.vertices().iterator();
+		Iterator<IVertex<GraphNode>> regionsA =  a.vertices().iterator();
 		
 		while(regionsA.hasNext()) {
 			
-			IVertex<IEntry<Integer[], Double[]>> i = regionsA.next();
+			IVertex<GraphNode> i = regionsA.next();
 			
 			Double minDistance = null;
 			
-			Iterator<IVertex<IEntry<Integer[], Double[]>>> regionsB =  b.vertices().iterator();
+			Iterator<IVertex<GraphNode>> regionsB =  b.vertices().iterator();
 			
 			while(regionsB.hasNext()) {
 				
-				IVertex<IEntry<Integer[], Double[]>> j = regionsB.next();
+				IVertex<GraphNode> j = regionsB.next();
 				
 				Double distance = calculateDistance(i,j);
 				
@@ -90,57 +91,27 @@ public class GraphSimilarity {
 		}
 		
 		return 1.0/(1.0+(totalDistance/a.numVertices()));
+		*/
+		double distance = calculateDistance(a, b);
+
+	    // 'sigma' controls the sensitivity. 
+	    // Lower sigma = more strict (percentages drop faster)
+	    // Higher sigma = more lenient (percentages stay higher)
+	    // For normalized histograms, 1.0 to 2.0 is usually perfect.
+	    double sigma = 1.5; 
+
+	    // Formula: e^(-distance / sigma) * 100
+	    double similarity = Math.exp(-distance / sigma) * 100.0;
+
+	    return similarity; // Ensure it doesn't go negative
 	}
 	
 	
-	public static Double calculateDistance(IVertex<IEntry<Integer[], Double[]>> a, IVertex<IEntry<Integer[], Double[]>> b) {
-		
-		Double[] featuresA = a.getElement().getValue();
-		Double[] featuresB = b.getElement().getValue();
-		
-		Double sum = 0.0;
-		Double finalDistance;
-		int numFeatures = featuresA.length;
-		
-		if(featuresB.length != numFeatures) return null;
-		
-		for(int i=0; i < numFeatures; i++) {
-			
-			sum += Math.pow(featuresA[i] - featuresB[i], 2);
-			
-		}
-		
-		Vertex<IEntry<Integer[], Double[]>, Double> aV = (Vertex<IEntry<Integer[], Double[]>, Double>) a;
-		Vertex<IEntry<Integer[], Double[]>, Double> bV = (Vertex<IEntry<Integer[], Double[]>, Double>) b;
-		
-		Iterator<IEdge<IEntry<Integer[], Double[]>, Double>> edgesA = aV.getOutgoing().values().iterator();
-		Iterator<IEdge<IEntry<Integer[], Double[]>, Double>> edgesB = bV.getOutgoing().values().iterator();
-		
-		Double sumA = 0.0;
-		Double sumB = 0.0;
-		
-		while(edgesA.hasNext()) {
-			
-			sumA += edgesA.next().getElement();
-			
-		}
-		
-		while(edgesB.hasNext()) {
-			
-			sumB += edgesB.next().getElement();
-			
-		}
-		
-		int degreeA = aV.getOutgoing().size();
-		int degreeB = bV.getOutgoing().size();
-		
-		Double avgWeightA = sumA/degreeA;
-		Double avgWeightB = sumB/degreeB;
-		
-		
-		finalDistance = (0.1 * Math.abs(avgWeightA - avgWeightB)) + (0.2 * Math.abs(degreeA - degreeB)) + (0.7 * Math.sqrt(sum));
-		
-		return finalDistance;
-	}
+	private static double calculateDistance(AnimalSignature a, AnimalSignature b) {
+        double sum = 0;
+        for (int i = 0; i < a.getHistogramSize(); i++) sum += Math.pow(a.histogram[i] - b.histogram[i], 2);
+        sum += Math.pow(a.getAverageConnectivity() - b.getAverageConnectivity(), 2) * 10;
+        return Math.sqrt(sum);
+    }
 	
 }

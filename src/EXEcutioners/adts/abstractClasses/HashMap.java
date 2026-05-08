@@ -1,5 +1,6 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -8,7 +9,7 @@ import java.util.Random;
 import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.interfaces.IMap;
 
-public class HashMap<K, V> implements IMap<K, V> {
+public class HashMap<K, V> implements IMap<K, V>, Serializable{
 	
 	private class ValueIterator implements Iterator<V>{
 		Iterator<IEntry<K, V>> entries = HashMap.this.entrySet().iterator();

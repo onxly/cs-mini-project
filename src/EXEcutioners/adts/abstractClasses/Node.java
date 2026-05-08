@@ -1,8 +1,10 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
+
 import EXEcutioners.adts.interfaces.IPosition;
 
-public class Node<E> implements IPosition<E> {
+public class Node<E> implements IPosition<E>, Serializable {
 	private E element;
 	private Node<E> next;
 	private Node<E> prev;

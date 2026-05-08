@@ -1,12 +1,13 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IPositionalList;
 
-public class LinkedPositionalList<E> implements IPositionalList<E>, Iterable<E> {
+public class LinkedPositionalList<E> implements IPositionalList<E>, Iterable<E>, Serializable {
 	private class PositionsIterator implements Iterator<IPosition<E>>{
 		private IPosition<E> cursor = LinkedPositionalList.this.first();
 		private IPosition<E> current = null;

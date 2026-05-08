@@ -1,6 +1,7 @@
 package EXEcutioners.GUI.UserInterfaces;
 
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,13 +18,19 @@ import EXEcutioners.GUI.HelperClasses.DragFilehandler;
 import EXEcutioners.GUI.HelperClasses.WindowHandler;
 import EXEcutioners.GUI.interfaces.IPreviousHelper;
 import EXEcutioners.adts.abstractClasses.LinkedPositionalList;
+import EXEcutioners.adts.abstractClasses.PQEntry;
+import EXEcutioners.adts.graph.AnimalSignature;
+import EXEcutioners.adts.graph.Classifier;
 import EXEcutioners.adts.graph.GraphNode;
 import EXEcutioners.adts.graph.ImageGraph;
-import EXEcutioners.algorithms.GraphVisualiser;
+import EXEcutioners.imagehandling.ImageBlurrer;
 import EXEcutioners.imagehandling.ImageProcessor;
-import EXEcutioners.imagehandling.LinkedRegionalList;
-import EXEcutioners.imagehandling.RegionFeature;
+import EXEcutioners.imagehandling.ImageRescaler;
+import EXEcutioners.imagehandling.ImageToArray;
+import EXEcutioners.imagehandling.SaliencyDetector;
 import EXEcutioners.imagehandling.backgroundMasker;
+import EXEcutioners.utils.GraphFileHelper;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -47,8 +54,11 @@ import javafx.stage.Stage;
 
 public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 
+	private Classifier classify = new Classifier();
+	
 	private final int WINDOW_WIDTH = 720;
-	private ImageGraph graph;
+	private ImageGraph graphA;
+	private AnimalSignature sig;
 	
 	private Stage graphStage;
 	private FxViewer viewer;
@@ -73,6 +83,7 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	
 	private Button btnSelectImgA = new Button("Browse");
 	private Button btnCompare = new Button("Classify");
+	private Button btnVisualise = new Button("Visualise");
 	
 	private TextArea txtResult = new TextArea();
 	
@@ -84,12 +95,24 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	VBox rightPanel = new VBox(10);
 	
 	HBox selectImageA = new HBox(10);
+	HBox bottomButtons = new HBox(10);
 	
 	VBox imagesContainer = new VBox(10);
 	
 	StackPane imageABox = new StackPane();
 	
 	ImageView imageA = new ImageView();
+	
+	private String btnStyle = "-fx-background-color: #1d2f23;" +
+		    "-fx-text-fill: white;" +
+		    "-fx-font-size: 14px;" +
+		    "-fx-font-weight: bold;" +
+		    "-fx-padding: 10px 22px;" +
+		    "-fx-background-radius: 12px;" +
+		    "-fx-border-radius: 12px;" +
+		    "-fx-cursor: hand;" +
+		    "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 8, 0.2, 0, 3);" +
+		    "-fx-font-family: 'Arial';";
 	
 	public SimilarityInterface() 
 	{
@@ -105,6 +128,8 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	    btnSelectImgA.setPrefWidth(120);
 
 	    btnCompare.setMaxWidth(Double.MAX_VALUE);
+	    
+	    btnVisualise.setDisable(true);
 
 	    selectImageA.setSpacing(10);
 
@@ -119,8 +144,10 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	    txtResult.setMaxWidth(Double.MAX_VALUE);
 	    txtResult.setMaxHeight(Double.MAX_VALUE);
 	    VBox.setVgrow(txtResult, Priority.ALWAYS);
+	    
+	    bottomButtons.getChildren().addAll(BackButton, btnVisualise);
 
-	    leftPanel.getChildren().addAll(lblSelectImgA, selectImageA, btnCompare, txtResult, BackButton);
+	    leftPanel.getChildren().addAll(lblSelectImgA, selectImageA, btnCompare, txtResult, bottomButtons);
 
 	    imagesContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 	    imagesContainer.setPadding(new Insets(5));
@@ -151,13 +178,51 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 
 	    leftPanel.setMaxWidth(Double.MAX_VALUE);
 	    rightPanel.setMaxWidth(Double.MAX_VALUE);
+	    
+	    btnCompare.setStyle(btnStyle);
+		btnSelectImgA.setStyle(btnStyle);
+		btnVisualise.setStyle(btnStyle);
+		BackButton.setStyle(btnStyle);
+		
+		lblSelectImgA.setStyle("-fx-text-fill: white;");
+		//txtResult.setStyle("-fx-background-color: #77a58b;");
+		txtFilePathA.setStyle("-fx-background-color: #77a58b;");
+		
 
 	    sidePanels.getChildren().addAll(leftPanel, rightPanel);
 	    
 		DragFilehandler.DragFile(imageABox, this::onLeftDroppedFile);
 
-	    this.setCenter(sidePanels);
-	    isClicked();
+		this.setStyle("-fx-background-color: #2c4734;");
+		
+		Platform.runLater(() -> {
+	        Stage stage = (Stage) this.getScene().getWindow();
+	        Scene originalScene = this.getScene(); // Store the reference to the main UI
+	        
+	        // 1. Show the Loading Screen
+	        Scene loadingScene = LoadingScreen.create();
+	        stage.setScene(loadingScene);
+
+	        // 2. Start background thread for heavy processing
+	        Thread thread = new Thread(() -> {
+	            try {
+	                // Perform the heavy IO/Math operations here
+	                isClicked(); 
+	                
+	                // Final UI setup
+	                Platform.runLater(() -> {
+	                    this.setCenter(sidePanels);
+	                    // 3. Switch back to the main UI when done
+	                    stage.setScene(originalScene);
+	                });
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+	        });
+
+	        thread.setDaemon(true);
+	        thread.start();
+	    });
 		
 		/*Alloc(); 
 		this.setHeight(600);
@@ -225,7 +290,7 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	
 	public void classifyGraph() {
 		
-		if(graph == null) {
+		if(sig == null) {
 			System.err.println("No graph to classify!!!");
 			
 			Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -236,44 +301,57 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 			return;
 		}
 		
-		Graph graphV = GraphVisualiser.drawGraph("testing", this.graph);
+		//Graph graphV = GraphVisualiser.drawGraph("testing", this.graph);
 		
-	    openGraphWindow(graphV);
+	    //openGraphWindow(graphV);
+		
+		//GraphClassifierML mlClassify = new GraphClassifierML(1);
+		
+		//mlClassify.train(GraphFileHelper.readGraphsFromDirectory("graphs"));
+		
+		//String response = mlClassify.classify(graph);
+		
+		String response = classify.classify(sig);
 		
 		txtResult.clear();
-		txtResult.setText("That's an animal... but I'm not sure...");
+		txtResult.setText(response);
 		
-		this.graph.drawGraph();
+		//this.graph.drawGraph();
 		
 	}
 	
-	public void onLeftDroppedFile(ArrayList<File> Files)
+	public void onLeftDroppedFile(ArrayList<File> files)
 	{
 		
-		LinkedRegionalList ImageRegionList = new LinkedRegionalList();
-
-		for (File f: Files ) {
-		//per image break up the image into region and add them into the list;
-		ImageRegionList.AddImageRegions(ImageProcessor.processImg(backgroundMasker.MaskBackground(f.getAbsolutePath())));
-		System.out.println("got past adding: "+ImageRegionList.getSize());
+		File file = files.get(0).getAbsoluteFile();
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(file);
+			BufferedImage imgScaled = ImageRescaler.rescale(img, 300, 300);
+			BufferedImage imgBlurred = ImageBlurrer.applyBlur(imgScaled, 10);
+			BufferedImage imgFocused = SaliencyDetector.computeSaliency(imgBlurred);
+			int[][] pixels = ImageToArray.getPixels2D(imgFocused);
+			ImageGraph graph = new ImageGraph();
+			graph.buildGraph(pixels, 100, 10);
+			this.graphA = graph;
+			
+			AnimalSignature unknown = classify.generateSignature(graph, 1);
+			this.sig = unknown;
+			//unknown.setSpecies("Lion");
+			PopulateBox(imageABox, imageA, files.get(0).getAbsolutePath(), txtFilePathA);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		Iterator<Iterable<GraphNode>> iteList = ImageRegionList.getGraphNodeList().iterator();
-		Iterable<GraphNode> listofRegions = null;
-		ImageGraph IG = new ImageGraph(3);
-		if (iteList.hasNext()) {
-			listofRegions = iteList.next();
-		}
-		IG.buildGraph(listofRegions);
-		
-		this.graph = IG;
 		
 		//IG.drawGraph();
 		
 		//PopulateBox(ImageSpotLeft, Files, left);
 		
 		//imageABox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		PopulateBox(imageABox, imageA, Files.get(0).getAbsolutePath(), txtFilePathA);
+		
+		
+		//btnVisualise.setDisable(false);
 			
 	}
 	
@@ -307,6 +385,32 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	
 	private void isClicked()
 	{
+		
+		ArrayList<ImageGraph> graphs = GraphFileHelper.readGraphsFromDirectory("graphs");
+		
+		if(graphs == null || graphs.isEmpty()) {
+			
+			GraphFileHelper.buildAndSaveGraphs("animals");
+		
+			graphs = GraphFileHelper.readGraphsFromDirectory("graphs");
+				
+			for(ImageGraph g : graphs) {
+			
+				AnimalSignature unknown = classify.generateSignature(g, 1);
+				unknown.setSpecies(g.getAnimalName());
+				classify.train(unknown);
+			}
+		}else {
+			
+			for(ImageGraph g : graphs) {
+				
+				AnimalSignature unknown = classify.generateSignature(g, 1);
+				unknown.setSpecies(g.getAnimalName());
+				classify.train(unknown);
+			}
+			
+		}
+		
 		Connect.setOnAction(new EventHandler<ActionEvent>()
 		{	
 			@Override
@@ -365,6 +469,22 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 			public void handle(ActionEvent arg0)
 			{
 				classifyGraph();
+			}
+			
+		});
+		
+		btnVisualise.setOnAction(new EventHandler<ActionEvent>(){
+			
+			@Override
+			public void handle(ActionEvent arg0)
+			{
+				
+				ArrayList<PQEntry<String, ImageGraph>> graphs = new ArrayList<PQEntry<String,ImageGraph>>();
+				
+				PQEntry<String,ImageGraph> imgGraph = new PQEntry<String, ImageGraph>("Classify", graphA);
+				
+				graphs.add(imgGraph);
+				
 			}
 			
 		});

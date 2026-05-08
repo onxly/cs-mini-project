@@ -1,5 +1,6 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -10,7 +11,7 @@ import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IPositionalList;
 import EXEcutioners.adts.interfaces.IVertex;
 
-public class MapGraph<V, E> implements IGraph<V, E>{
+public class MapGraph<V, E> implements IGraph<V, E>, Serializable{
 	protected boolean isDirected;
 	protected LinkedPositionalList<IVertex<V>> vertices = new LinkedPositionalList<>();
 	protected LinkedPositionalList<IEdge<V,E>> edges = new LinkedPositionalList<>();

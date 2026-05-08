@@ -1,5 +1,6 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -7,7 +8,7 @@ import java.util.NoSuchElementException;
 import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.adts.interfaces.IMap;
 
-public class TableMap<K, V> implements IMap<K, V> {
+public class TableMap<K, V> implements IMap<K, V>, Serializable {
 	
 	private class EntryIterator implements Iterator<IEntry<K,V>>{
 		int iCurrent = 0;

@@ -1,8 +1,10 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
+
 import EXEcutioners.adts.interfaces.IEntry;
 
-public class MapEntry<K, V> implements IEntry<K, V> {
+public class MapEntry<K, V> implements IEntry<K, V>, Serializable {
 	private K key;
 	private V value;
 	

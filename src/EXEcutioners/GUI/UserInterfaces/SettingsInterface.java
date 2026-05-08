@@ -1,4 +1,4 @@
-package EXEcutioners.GUI.UserInterfaces;
+/*package EXEcutioners.GUI.UserInterfaces;
 import java.io.File;
 
 import org.graphstream.graph.Graph;
@@ -20,6 +20,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import EXEcutioners.GUI.interfaces.IPreviousHelper;
 import EXEcutioners.algorithms.GraphVisualiser;
+import EXEcutioners.utils.GraphFileHelper;
 import EXEcutioners.GUI.HelperClasses.WindowHandler;
 public class SettingsInterface extends BorderPane implements IPreviousHelper {
 	
@@ -82,7 +83,12 @@ public class SettingsInterface extends BorderPane implements IPreviousHelper {
 	
 	public SettingsInterface()
 	{
+		System.out.println("Saving...");
 	    
+		GraphFileHelper.buildAndSaveGraphs("info_animal_images");
+		
+		System.out.println("Done?...");
+		
 	    this.setBottom(BackButton);
 		
 		isClicked();
@@ -136,4 +142,4 @@ public class SettingsInterface extends BorderPane implements IPreviousHelper {
 		MainStage=mainStage;
 	
 	}
-}
+}*/

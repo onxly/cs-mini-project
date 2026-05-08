@@ -1,11 +1,13 @@
 package EXEcutioners.adts.abstractClasses;
 
+import java.io.Serializable;
+
 import EXEcutioners.adts.interfaces.IEdge;
 import EXEcutioners.adts.interfaces.IMap;
 import EXEcutioners.adts.interfaces.IPosition;
 import EXEcutioners.adts.interfaces.IVertex;
 
-public class Vertex<V, E> implements IVertex<V>  {
+public class Vertex<V, E> implements IVertex<V>, Serializable {
 	 private String name = "";
 	 private V element;
 	 private IPosition <IVertex<V>> pos;

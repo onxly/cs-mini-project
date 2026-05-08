@@ -74,9 +74,17 @@ public class SobelOperator {
 						}
 					}
 						
-					int r = (int) Math.min(255,Math.sqrt(XGrR*XGrR+YGrR*YGrR));
-					int g = (int) Math.min(255,Math.sqrt(XGrG*XGrG+YGrG*YGrG));
-					int b = (int) Math.min(255,Math.sqrt(XGrB*XGrB+YGrB*YGrB));
+					
+					
+					double gx=(XGrR+XGrG+XGrB)/3.0;
+					double gy=(YGrR+YGrG+YGrB)/3.0;
+					double AvgGrMag=Math.sqrt(gx*gx + gy*gy);
+					
+					int r = (int) Math.min(255,Math.max(0,gx+128));
+					int g = (int) Math.min(255,Math.max(0,gy+128));
+					int b = (int) Math.min(255,AvgGrMag);
+					
+					
 					int SobelRGB = (r<<16)|(g<<8)|b;
 
 					Sobelimage.setRGB(x, y, SobelRGB);

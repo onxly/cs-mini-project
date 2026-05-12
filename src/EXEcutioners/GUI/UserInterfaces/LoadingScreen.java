@@ -8,10 +8,10 @@ import javafx.scene.layout.VBox;
 
 public class LoadingScreen {
 
-    public static Scene create() {
+    public static Scene create(String msg) {
         ProgressIndicator spinner = new ProgressIndicator();
 
-        Label label = new Label("Processing...");
+        Label label = new Label(msg);
         label.setStyle(
             "-fx-text-fill: white;" +
             "-fx-font-size: 18px;" +

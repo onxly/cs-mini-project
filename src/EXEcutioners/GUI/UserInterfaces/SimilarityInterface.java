@@ -23,6 +23,10 @@ import EXEcutioners.adts.graph.AnimalSignature;
 import EXEcutioners.adts.graph.Classifier;
 import EXEcutioners.adts.graph.GraphNode;
 import EXEcutioners.adts.graph.ImageGraph;
+import EXEcutioners.adts.interfaces.IEntry;
+import EXEcutioners.algorithms.ml.SpeciesClassifier;
+import EXEcutioners.algorithms.ml.SpeciesPredictor;
+import EXEcutioners.algorithms.ml.WekaDataUtility;
 import EXEcutioners.imagehandling.ImageBlurrer;
 import EXEcutioners.imagehandling.ImageProcessor;
 import EXEcutioners.imagehandling.ImageRescaler;
@@ -51,10 +55,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import weka.core.DenseInstance;
+import weka.core.Instances;
 
 public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 
 	private Classifier classify = new Classifier();
+	private SpeciesPredictor sp;
+	private File pendingFile;
 	
 	private final int WINDOW_WIDTH = 720;
 	private ImageGraph graphA;
@@ -151,9 +159,6 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 
 	    imagesContainer.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 	    imagesContainer.setPadding(new Insets(5));
-	    
-	    //imageABox.getChildren().setAll(imageA);
-	    //imageBBox.getChildren().setAll(imageB);
 
 	    imageABox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
@@ -185,7 +190,6 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 		BackButton.setStyle(btnStyle);
 		
 		lblSelectImgA.setStyle("-fx-text-fill: white;");
-		//txtResult.setStyle("-fx-background-color: #77a58b;");
 		txtFilePathA.setStyle("-fx-background-color: #77a58b;");
 		
 
@@ -197,22 +201,17 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 		
 		Platform.runLater(() -> {
 	        Stage stage = (Stage) this.getScene().getWindow();
-	        Scene originalScene = this.getScene(); // Store the reference to the main UI
+	        Scene originalScene = this.getScene();
 	        
-	        // 1. Show the Loading Screen
-	        Scene loadingScene = LoadingScreen.create();
+	        Scene loadingScene = LoadingScreen.create("Processing...");
 	        stage.setScene(loadingScene);
 
-	        // 2. Start background thread for heavy processing
 	        Thread thread = new Thread(() -> {
 	            try {
-	                // Perform the heavy IO/Math operations here
 	                isClicked(); 
 	                
-	                // Final UI setup
 	                Platform.runLater(() -> {
 	                    this.setCenter(sidePanels);
-	                    // 3. Switch back to the main UI when done
 	                    stage.setScene(originalScene);
 	                });
 	            } catch (Exception e) {
@@ -224,192 +223,176 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 	        thread.start();
 	    });
 		
-		/*Alloc(); 
-		this.setHeight(600);
-		this.setWidth(400);
-		isClicked();*/
-	}
-	private void Alloc()
-	{
-		VBox AddressXPort = new VBox(10);
-		SeederAddress.setPrefSize(100, 50);
-		SeederPort.setPrefSize(100, 50);
-		FileList.setPrefSize(400, 100);
-		BackButton.setPrefSize(400, 50); 
-		AddressXPort.getChildren().addAll(SeederAddress,SeederPort, BackButton);
-		
-		HBox SeederXConnect =new HBox(10);
-		FileNumber.setPrefSize(50, 50);
-		
-		SeederXConnect.getChildren().addAll(AddressXPort,Connect,Retrieve,FileNumber);
-		
-		
-		this.setTop(SeederXConnect);
-		this.setBottom(FileList);
-	}
-	
-	private void openGraphWindow(Graph graph) {
-	    if (graphStage != null && graphStage.isShowing()) {
-	        graphStage.toFront();
-	        return;
-	    }
-
-	    viewer = new FxViewer(graph, Viewer.ThreadingModel.GRAPH_IN_GUI_THREAD);
-	    viewer.enableAutoLayout();
-
-	    graphView = (FxDefaultView) viewer.addDefaultView(false);
-
-	    BorderPane root = new BorderPane();
-	    root.setCenter(graphView);
-
-	    Scene scene = new Scene(root, 800, 600);
-
-	    graphStage = new Stage();
-	    graphStage.setTitle("Graph Viewer");
-	    graphStage.setScene(scene);
-
-	    graphStage.setOnCloseRequest(e -> closeGraphWindow());
-
-	    graphStage.show();
-	}
-	
-	private void closeGraphWindow() {
-	    if (viewer != null) {
-	        viewer.disableAutoLayout();
-	        viewer.close();
-	        viewer = null;
-	    }
-
-	    if (graphStage != null) {
-	        graphStage.close();
-	        graphStage = null;
-	    }
-
-	    graphView = null;
 	}
 	
 	public void classifyGraph() {
-		
-		if(sig == null) {
-			System.err.println("No graph to classify!!!");
-			
-			Alert alert = new Alert(Alert.AlertType.ERROR);
-			alert.setTitle("Error");
-			alert.setHeaderText("Please select an image first!");
-			alert.showAndWait();
-			
-			return;
-		}
-		
-		//Graph graphV = GraphVisualiser.drawGraph("testing", this.graph);
-		
-	    //openGraphWindow(graphV);
-		
-		//GraphClassifierML mlClassify = new GraphClassifierML(1);
-		
-		//mlClassify.train(GraphFileHelper.readGraphsFromDirectory("graphs"));
-		
-		//String response = mlClassify.classify(graph);
-		
-		String response = classify.classify(sig);
-		
-		txtResult.clear();
-		txtResult.setText(response);
-		
-		//this.graph.drawGraph();
-		
+	    if (pendingFile == null) {
+	        Alert alert = new Alert(Alert.AlertType.ERROR);
+	        alert.setTitle("Error");
+	        alert.setHeaderText("No image selected!");
+	        alert.showAndWait();
+	        return;
+	    }
+
+	    Stage stage = (Stage) this.getScene().getWindow();
+	    Scene originalScene = this.getScene();
+	    
+	    stage.setScene(LoadingScreen.create("Calculating..."));
+
+	    Thread processingThread = new Thread(() -> {
+	        try {
+	            BufferedImage img = ImageIO.read(pendingFile);
+	            BufferedImage imgScaled = ImageRescaler.rescale(img, 300, 300);
+	            BufferedImage imgBlurred = ImageBlurrer.applyBlur(imgScaled, 10);
+	            BufferedImage imgFocused = SaliencyDetector.computeSaliency(imgBlurred);
+	            
+	            int[][] pixels = ImageToArray.getPixels2D(imgFocused);
+	            ImageGraph graph = new ImageGraph();
+	            graph.buildGraph(pixels, 100, 10);
+	            
+	            this.graphA = graph;
+	            this.sig = classify.generateSignature(graph);
+
+	            String response = sp.classify(sig.getHistogram());
+
+	            Platform.runLater(() -> {
+	                txtResult.setText(response);
+	                btnVisualise.setDisable(false);
+	                stage.setScene(originalScene);
+	            });
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            Platform.runLater(() -> {
+	                stage.setScene(originalScene);
+	                txtResult.setText("Error processing image: " + e.getMessage());
+	            });
+	        }
+	    });
+
+	    processingThread.setDaemon(true);
+	    processingThread.start();
 	}
 	
-	public void onLeftDroppedFile(ArrayList<File> files)
-	{
+	public void onLeftDroppedFile(File file) {
+	    if (!file.exists()) return;
+
+	    graphA = null;
+	    sig = null;
+	    txtResult.clear();
+	    txtFilePathA.clear();
+	    
+	    this.pendingFile = file;
+	    
+	    txtFilePathA.setText(pendingFile.getName());
+	    PopulateBox(imageABox, imageA, pendingFile.getAbsolutePath());
+	    
+	    btnCompare.setDisable(false);
+	}
+	
+	public void PopulateBox(StackPane Box, ImageView img, String filePath) {
+	    
+	    Box.getChildren().clear();
+
+	    Image newImage = new Image("file:" + this.pendingFile);
+	    
+	    img.setImage(newImage);
+	    img.setPreserveRatio(true);
+	    img.setSmooth(true);
+
+	    img.fitWidthProperty().unbind();
+	    img.fitHeightProperty().unbind();
+	    img.fitWidthProperty().bind(Box.widthProperty());
+	    img.fitHeightProperty().bind(Box.heightProperty());
+
+	    img.setManaged(false);
+
+	    Box.getChildren().add(img);
+	    
+	    Box.applyCss();
+	    Box.layout();
+	    
+	    Box.setStyle("-fx-border-color: transparent; -fx-background-color: transparent;");
+	}
+	
+	public void setUpML() {
 		
-		File file = files.get(0).getAbsoluteFile();
-		BufferedImage img = null;
-		try {
-			img = ImageIO.read(file);
-			BufferedImage imgScaled = ImageRescaler.rescale(img, 300, 300);
-			BufferedImage imgBlurred = ImageBlurrer.applyBlur(imgScaled, 10);
-			BufferedImage imgFocused = SaliencyDetector.computeSaliency(imgBlurred);
-			int[][] pixels = ImageToArray.getPixels2D(imgFocused);
-			ImageGraph graph = new ImageGraph();
-			graph.buildGraph(pixels, 100, 10);
-			this.graphA = graph;
+		ArrayList<IEntry<String, double[]>> histoGrams = GraphFileHelper.readHistogramsFromDirectory("graphs");
+		
+		Instances dataset = null;
+		
+		File modelFile = new File("model/wildgraph.model");
+		
+		File arffFile = new File("docs/dataset.arff");
+		
+		boolean reset = false;
 			
-			AnimalSignature unknown = classify.generateSignature(graph, 1);
-			this.sig = unknown;
-			//unknown.setSpecies("Lion");
-			PopulateBox(imageABox, imageA, files.get(0).getAbsolutePath(), txtFilePathA);
-		} catch (IOException e) {
+		if(histoGrams == null || histoGrams.isEmpty()) {
+			GraphFileHelper.buildAndSaveGraphs("animals");
+			reset = true;
+		}
+		
+		histoGrams = GraphFileHelper.readHistogramsFromDirectory("graphs");
+		
+		if(!arffFile.exists() || reset) {
+			
+			ArrayList<String> names = GraphFileHelper.readNamesFromFolders("animals");
+		
+			dataset = WekaDataUtility.createHeader(histoGrams.get(0).getValue().length, names);
+							
+			for (IEntry<String, double[]> h : histoGrams) {
+			    double[] values = new double[dataset.numAttributes()];
+			    double[] histogramData = h.getValue();
+
+			    for (int i = 0; i < histogramData.length; i++) {
+			        values[i] = histogramData[i];
+			    }
+
+			    int classIndex = names.indexOf(h.getKey());
+			    			    
+			    if (classIndex == -1) {
+			        System.err.println("Species '" + h.getKey() + "' was not found in the header's species list.");
+			    }
+
+			    values[dataset.numAttributes() - 1] = classIndex;
+
+			    dataset.add(new DenseInstance(1.0, values));
+			}
+			
+			try {
+				WekaDataUtility.saveDataset(dataset, "docs/dataset.arff");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		}
+			
+		try {
+			dataset = WekaDataUtility.loadDataset(arffFile.getPath());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+				
+		if(!modelFile.exists() || reset) {
+			SpeciesClassifier.train(dataset);
+		}
+		
+		try {
+			this.sp = new SpeciesPredictor(modelFile.getAbsolutePath(), dataset);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		//IG.drawGraph();
-		
-		//PopulateBox(ImageSpotLeft, Files, left);
-		
-		//imageABox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		
-		
-		//btnVisualise.setDisable(false);
-			
-	}
-	
-	public void PopulateBox(StackPane Box, ImageView img, String filePath, TextField input)
-	{
-		input.setText(filePath);
-		
-		Box.setAlignment(Pos.CENTER);
-		//VBox.setVgrow(Box, Priority.ALWAYS);
-
-		img.setImage(new Image("file:" + filePath));
-
-		img.setPreserveRatio(true);
-		img.setSmooth(true);
-
-		img.fitWidthProperty().unbind();
-		img.fitHeightProperty().unbind();
-
-		img.fitWidthProperty().bind(Box.widthProperty());
-		img.fitHeightProperty().bind(Box.heightProperty());
-
-		img.setManaged(false);
-
-		Box.setStyle("-fx-border-color: transparent;" +
-	    	    "-fx-background-color: transparent;");
-		Box.getChildren().setAll(img);
-			
-		
-	}
+	} 
 	
 	
 	private void isClicked()
 	{
-		
-		ArrayList<ImageGraph> graphs = GraphFileHelper.readGraphsFromDirectory("graphs");
-		
-		if(graphs == null || graphs.isEmpty()) {
-			
-			GraphFileHelper.buildAndSaveGraphs("animals");
-		
-			graphs = GraphFileHelper.readGraphsFromDirectory("graphs");
-				
-			for(ImageGraph g : graphs) {
-			
-				AnimalSignature unknown = classify.generateSignature(g, 1);
-				unknown.setSpecies(g.getAnimalName());
-				classify.train(unknown);
-			}
-		}else {
-			
-			for(ImageGraph g : graphs) {
-				
-				AnimalSignature unknown = classify.generateSignature(g, 1);
-				unknown.setSpecies(g.getAnimalName());
-				classify.train(unknown);
-			}
-			
-		}
+						
+		setUpML();
 		
 		Connect.setOnAction(new EventHandler<ActionEvent>()
 		{	
@@ -444,20 +427,16 @@ public class SimilarityInterface extends BorderPane implements IPreviousHelper{
 			
 			@Override
 			public void handle(ActionEvent arg0)
-			{
-				ArrayList<File> files = new ArrayList<>();
-			
+			{			
 				FileChooser Choose = new FileChooser();
 				Choose.getExtensionFilters().add(
 	                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
 	                );
-	                File file = Choose.showOpenDialog(null);
+	                File file = Choose.showOpenDialog(null);	                
 	                
-	                files.add(file);
-	                
-	                if (files != null && !files.isEmpty()) {
+	                if (file != null && file.exists()) {
 	                	
-	                	onLeftDroppedFile(files);
+	                	onLeftDroppedFile(file);
 	                }
 			}
 			

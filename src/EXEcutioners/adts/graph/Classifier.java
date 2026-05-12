@@ -40,7 +40,10 @@ public class Classifier {
         return winner;
     }
 
-    public AnimalSignature generateSignature(ImageGraph graph, int numTypes) {
+    public AnimalSignature generateSignature(ImageGraph graph) {
+    	
+    	int numTypes = 10;
+    	
         double[] histogram = new double[numTypes];
         double totalDegree = 0;
         int count = 0;
@@ -64,7 +67,13 @@ public class Classifier {
     }
 
     private int predictNodeType(GraphNode sp) {
-        return (sp.getArrRGB()[1] > sp.getArrRGB()[0] && sp.getArrRGB()[1] > sp.getArrRGB()[2]) ? 1 : 0;
+        double[] rgb = sp.getArrRGB();
+        // Calculate brightness from 0 to 255
+        double brightness = (rgb[0] + rgb[1] + rgb[2]) / 3.0;
+        
+        // Scale 0-255 down to 0-9
+        int bin = (int)(brightness / 256.0 * 10);
+        return Math.min(bin, 9); // Ensure it doesn't hit 10
     }
 
     private static class Neighbor {

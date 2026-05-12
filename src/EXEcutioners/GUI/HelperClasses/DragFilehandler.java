@@ -2,62 +2,60 @@ package EXEcutioners.GUI.HelperClasses;
 
 import javafx.scene.control.TextArea;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import javafx.scene.Node;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+
 /**
- * Handles drag-and-drop file input for JavaFX nodes.
- * If the node is a TextArea, dropped file paths are displayed in it.
+ * Handles drag-and-drop for a single file input for JavaFX nodes.
  */
-public class DragFilehandler{
-	 /**
-     * Enables drag-and-drop on a node and stores dropped files.
+public class DragFilehandler {
+
+    /**
+     * Enables drag-and-drop on a node and processes a single dropped file.
      *
-     * @param <T>  type of JavaFX Node
-     * @param Type the node to attach drag functionality to
-     * @return list of dropped files (filled after drop event occurs)
+     * @param <T>          type of JavaFX Node
+     * @param node         the node to attach drag functionality to
+     * @param fileDropped  callback that receives the single dropped File
      */
-	public static <T extends Node>  ArrayList<File> DragFile(T Type, Consumer<ArrayList<File>> FilesDropped)
-	{
-		ArrayList<File> Images = new ArrayList<File>();
-		Type.setOnDragOver(e -> {
-			if(e.getDragboard().hasFiles())
-			{
-				e.acceptTransferModes(TransferMode.COPY);
-			}
-			e.consume();
-		});
-		
-		Type.setOnDragDropped(e -> {
-			Dragboard DB = e.getDragboard();
-			boolean Success  = false ;
-			if(DB.hasFiles())
-			{
-				List<File> Content = DB.getFiles();
-				for(File f : Content)
-				{
-					System.out.println("Dropped file : " + f.getAbsolutePath());
-					
-					if(Type instanceof TextArea)
-					{
-						TextArea Ta = (TextArea) Type;
-						Ta.appendText(f.getAbsolutePath()+ "\n");
-					}
-					
-					
-					Images.add(f);
-				}	
-				 FilesDropped.accept(Images);
-				 e.setDropCompleted(true);
-				 e.consume();
-			}
-		});
-		return Images;
-	}
+    public static <T extends Node> void DragFile(T node, Consumer<File> fileDropped) {
+        
+        node.setOnDragOver(e -> {
+            if (e.getDragboard().hasFiles()) {
+                e.acceptTransferModes(TransferMode.COPY);
+            }
+            e.consume();
+        });
 
+        node.setOnDragDropped(e -> {
+            Dragboard db = e.getDragboard();
+            boolean success = false;
+            
+            if (db.hasFiles()) {
+                // Get the list but only take the first element
+                List<File> content = db.getFiles();
+                if (!content.isEmpty()) {
+                    File f = content.get(0);
+                    
+                    System.out.println("Dropped file: " + f.getAbsolutePath());
+
+                    if (node instanceof TextArea) {
+                        TextArea ta = (TextArea) node;
+                        // For a single file, we usually want to clear the text first 
+                        // or just show the one path.
+                        ta.setText(f.getAbsolutePath() + "\n");
+                    }
+
+                    // Trigger the callback with ONLY the first file
+                    fileDropped.accept(f);
+                    success = true;
+                }
+            }
+            e.setDropCompleted(success);
+            e.consume();
+        });
+    }
 }
-

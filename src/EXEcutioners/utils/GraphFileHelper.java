@@ -10,14 +10,17 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
+import EXEcutioners.adts.abstractClasses.PQEntry;
 import EXEcutioners.adts.graph.AnimalSignature;
 import EXEcutioners.adts.graph.Classifier;
 import EXEcutioners.adts.graph.GraphNode;
 import EXEcutioners.adts.graph.ImageGraph;
+import EXEcutioners.adts.interfaces.IEntry;
 import EXEcutioners.imagehandling.ImageBlurrer;
 import EXEcutioners.imagehandling.ImageProcessor;
 import EXEcutioners.imagehandling.ImageRescaler;
@@ -49,75 +52,58 @@ public class GraphFileHelper {
     }
     
     public static void buildAndSaveGraphs(String directory) {
-
-    	System.out.println("Looking for: " + directory);
-    	
         File folder = new File(directory);
 
         if (!folder.exists() || !folder.isDirectory()) {
-        	System.out.println("No folder named " + directory);
+            System.out.println("Invalid directory: " + directory);
             return;
         }
 
-        System.out.println("Found: " + directory);
-        
         File[] files = folder.listFiles();
-
-        if (files == null) {
-            return;
-        }
+        if (files == null) return;
 
         for (File file : files) {
-            if (file.isFile()) {
-            	
-            	System.out.println("Found Image: " + file.getName());
-            	try {
-            	BufferedImage img = ImageIO.read(file);
-    			BufferedImage imgScaled = ImageRescaler.rescale(img, 300, 300);
-    			BufferedImage imgBlurred = ImageBlurrer.applyBlur(imgScaled, 10);
-    			BufferedImage imgFocused = SaliencyDetector.computeSaliency(imgBlurred);
-    			int[][] pixels = ImageToArray.getPixels2D(imgFocused);
-    			ImageGraph graph = new ImageGraph();
-    			graph.buildGraph(pixels, 100, 10);
-    			String fileName = file.getName().split("\\.")[0];
-    			
-    			graph.setAnimalName(fileName.substring(0, fileName.length() - 1));
-    			
-    			saveGraph(graph, "graphs", file.getName().split("\\.")[0] + ".dat");
-    			
-            	} catch(IOException ex) {
-            		ex.printStackTrace();
-            	}
-    			
-            	
-            	
-            	/*LinkedRegionalList ImageRegionList = new LinkedRegionalList();
-            	ImageRegionList.AddImageRegions(ImageProcessor.processImg(backgroundMasker.MaskBackground(file.getAbsolutePath())));
-            	
-            	Iterator<Iterable<GraphNode>> iteList = ImageRegionList.getGraphNodeList().iterator();
-        		Iterable<GraphNode> listofRegions = null;
-        		ImageGraph IG = new ImageGraph(3);
-        		
-        		if (iteList.hasNext()) {
-        			listofRegions = iteList.next();
-        		}
-        		
-        		IG.buildGraph(listofRegions);
-        		
-        		String fileName = file.getName().split("\\.")[0];
-        		
-        		String name = fileName.substring(0, fileName.length() - 1);
-        		
-        		IG.setAnimalName(name);
-        		
-        		System.out.println("Saved a: " + name);
-
-                saveGraph(IG, "graphs", fileName + ".dat");*/
-            }else {
-            	System.out.println("This is not a file: " + file.getName());
+            if (file.isDirectory()) {
+                // Recurse into subfolder
+                buildAndSaveGraphs(file.getAbsolutePath());
+            } else if (file.isFile()) {
+                // Process image and pass the name of the parent folder
+                String parentFolderName = file.getParentFile().getName();
+                processImageFile(file, parentFolderName);
             }
+        }
+    }
+
+    private static void processImageFile(File file, String folderName) {
+        // Basic filter to ensure we are reading images
+        String name = file.getName().toLowerCase();
+        if (!(name.endsWith(".jpg") || name.endsWith(".png") || name.endsWith(".jpeg"))) {
+            return; 
+        }
+
+        System.out.println("Processing: " + file.getName() + " [Category: " + folderName + "]");
+        
+        try {
+            BufferedImage img = ImageIO.read(file);
+            if (img == null) return;
+
+            BufferedImage imgScaled = ImageRescaler.rescale(img, 300, 300);
+            BufferedImage imgBlurred = ImageBlurrer.applyBlur(imgScaled, 10);
+            BufferedImage imgFocused = SaliencyDetector.computeSaliency(imgBlurred);
+            int[][] pixels = ImageToArray.getPixels2D(imgFocused);
+
+            ImageGraph graph = new ImageGraph();
+            graph.buildGraph(pixels, 100, 10);
             
+            // Use the folder name as the Animal Name
+            graph.setAnimalName(folderName.trim());
             
+            // Save the .dat file using the original filename
+            String fileNameOnly = file.getName().split("\\.")[0];
+            saveGraph(graph, "graphs", fileNameOnly + ".dat");
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -175,6 +161,106 @@ public class GraphFileHelper {
         }
 
         return graphs;
+    }
+    
+    public static ArrayList<IEntry<String, double[]>> readHistogramsFromDirectory(String directory){
+    	
+    	Classifier classify = new Classifier();
+    	
+    	ArrayList<IEntry<String, double[]>> histoGrams = new ArrayList<IEntry<String, double[]>>();
+
+        File folder = new File(directory);
+
+        if (!folder.exists() || !folder.isDirectory()) {
+        	System.err.println("No Folder named: " + directory);
+            return null;
+        }
+
+        File[] files = folder.listFiles();
+
+        if (files == null) {
+        	System.err.println("No Files in: " + directory);
+            return null;
+        }
+
+        for (File file : files) {
+            if (file.isFile()) {
+            	//System.out.println("File Found: " + file.getName());
+            	
+            	ImageGraph graph = readGraph(file);
+
+                if (graph != null) {
+                	//System.out.println("Adding Graph...");
+                    AnimalSignature sig = classify.generateSignature(graph);
+                    
+                    IEntry<String, double[]> entry = new PQEntry<String, double[]>(graph.getAnimalName().trim(), sig.getHistogram());
+                    //System.out.println("Graph Added!!!");
+                    histoGrams.add(entry);
+                }
+            }
+        }
+    	
+    	return histoGrams;
+    }
+    
+    public static ArrayList<String> readNamesFromFolders(String dir){
+    	
+    	ArrayList<String> names = new ArrayList<String>();
+
+        File folder = new File(dir);
+
+        if (!folder.exists() || !folder.isDirectory()) {
+        	System.err.println("No Folder named: " + dir);
+            return null;
+        }
+
+        File[] files = folder.listFiles();
+
+        if (files == null) {
+        	System.err.println("No Files in: " + dir);
+            return null;
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+            	
+            	names.add(file.getName().trim());
+            	
+            }
+        }
+    	
+        Collections.sort(names);
+    	return names;
+    }
+    
+    public static ArrayList<String> readNames(String dir){
+    	
+    	ArrayList<String> names = new ArrayList<String>();
+
+        File folder = new File(dir);
+
+        if (!folder.exists() || !folder.isDirectory()) {
+        	System.err.println("No Folder named: " + dir);
+            return null;
+        }
+
+        File[] files = folder.listFiles();
+
+        if (files == null) {
+        	System.err.println("No Files in: " + dir);
+            return null;
+        }
+
+        for (File file : files) {
+            if (file.isFile()) {
+            	
+            	names.add(file.getName().split("[^A-Za-z]+")[0].trim());
+            	
+            }
+        }
+    	
+    	
+    	return names;
     }
 
 }

@@ -269,10 +269,9 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		
 	}
 	
-	public void onLeftDroppedFile(ArrayList<File> files)
+	public void onLeftDroppedFile(File file)
 	{
 
-		File file = files.get(0).getAbsoluteFile();
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(file);
@@ -285,7 +284,7 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 			this.graphA = graph;
 			Classifier classify = new Classifier();
 			
-			AnimalSignature unknown = classify.generateSignature(graph, 2);
+			AnimalSignature unknown = classify.generateSignature(graph);
 			unknown.setSpecies("Lion");
 			classify.train(unknown);
 			this.asA = unknown;
@@ -298,10 +297,9 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 	}
 				
 				
-	public void onRightDroppedFile(ArrayList<File> files)
+	public void onRightDroppedFile(File file)
 	{
 
-		File file = files.get(0).getAbsoluteFile();
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(file);
@@ -314,7 +312,7 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 			this.graphB = graph;
 			Classifier classify = new Classifier();
 			
-			AnimalSignature unknown = classify.generateSignature(graph, 2);
+			AnimalSignature unknown = classify.generateSignature(graph);
 			unknown.setSpecies("Lion");
 			classify.train(unknown);
 			this.asB = unknown;
@@ -356,7 +354,7 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 		
 		
 		
-		SelectRightImages.setOnAction(new EventHandler<ActionEvent>()
+		btnSelectImgA.setOnAction(new EventHandler<ActionEvent>()
 		{
 			
 			@Override
@@ -367,13 +365,16 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 				Choose.getExtensionFilters().add(
 	                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
 	                );
-	                ArrayList<File> files = new ArrayList<>(Choose.showOpenMultipleDialog(null));
-	                if (files != null && !files.isEmpty()) {
-	                    onRightDroppedFile(files);
+	                File file = Choose.showOpenDialog(null);	                
+	                
+	                if (file != null && file.exists()) {
+	                	
+	                	onRightDroppedFile(file);
 	                }
 			}
 		});
-		SelectLeftImages.setOnAction(new EventHandler<ActionEvent>()
+		
+		btnSelectImgB.setOnAction(new EventHandler<ActionEvent>()
 		{
 			
 			@Override
@@ -384,9 +385,11 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 				Choose.getExtensionFilters().add(
 	                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
 	                );
-	                ArrayList<File> files = new ArrayList<>(Choose.showOpenMultipleDialog(null));
-	                if (files != null && !files.isEmpty()) {
-	                    onLeftDroppedFile(files);
+	                File file = Choose.showOpenDialog(null);	                
+	                
+	                if (file != null && file.exists()) {
+	                	
+	                	onLeftDroppedFile(file);
 	                }
 			}
 		});
@@ -400,52 +403,6 @@ public class ComparisonInterface extends BorderPane implements IPreviousHelper{
 				MainStage.setTitle("Home");
 			
 			}
-		});
-		
-		btnSelectImgA.setOnAction(new EventHandler<ActionEvent>(){
-			
-			@Override
-			public void handle(ActionEvent arg0)
-			{
-				ArrayList<File> files = new ArrayList<>();
-			
-				FileChooser Choose = new FileChooser();
-				Choose.getExtensionFilters().add(
-	                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
-	                );
-	                File file = Choose.showOpenDialog(null);
-	                
-	                files.add(file);
-	                
-	                if (files != null && !files.isEmpty()) {
-	                	
-	                	onLeftDroppedFile(files);
-	                }
-			}
-			
-		});
-		
-		btnSelectImgB.setOnAction(new EventHandler<ActionEvent>(){
-			
-			@Override
-			public void handle(ActionEvent arg0)
-			{
-				ArrayList<File> files = new ArrayList<>();
-			
-				FileChooser Choose = new FileChooser();
-				Choose.getExtensionFilters().add(
-	                    new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
-	                );
-	                File file = Choose.showOpenDialog(null);
-	                
-	                files.add(file);
-	                
-	                if (files != null && !files.isEmpty()) {
-	                	
-	                	onRightDroppedFile(files);
-	                }
-			}
-			
 		});
 		
 		btnCompare.setOnAction(new EventHandler<ActionEvent>(){
